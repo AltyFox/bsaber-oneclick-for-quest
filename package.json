@@ -1,0 +1,46 @@
+{
+  "name": "bsaber-oneclick-for-quest",
+  "version": "0.0.0",
+  "description": "",
+  "author": "Alteran",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "prepare": "husky install",
+    "dev": "rollup -wc",
+    "clean": "del-cli dist",
+    "lint": "eslint --ext .ts,.tsx .",
+    "ci": "run-s lint",
+    "build:js": "rollup -c",
+    "build": "cross-env NODE_ENV=production run-s ci clean build:js"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.22.10",
+    "@yume-chan/adb-credential-web": "^0.0.21",
+    "@yume-chan/adb-daemon-webusb": "^0.0.21",
+    "jszip": "^3.10.1",
+    "notyf": "^3.10.0"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-react-jsx": "^7.22.5",
+    "@gera2ld/plaid": "~2.6.0",
+    "@gera2ld/plaid-rollup": "~2.6.0",
+    "@unocss/postcss": "^0.55.2",
+    "@violentmonkey/types": "^0.1.5",
+    "babel-preset-solid": "^1.7.7",
+    "del-cli": "^5.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1",
+    "prettier": "^3.0.2",
+    "rollup-plugin-userscript": "^0.2.0",
+    "unocss": "^0.55.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": "eslint --fix"
+  }
+}
