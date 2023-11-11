@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         BeatSaver Quest OneClick Installer
+// @name         Quest OneClick Installer
 // @namespace    https://bsaber.com/
 // @version      1.1.0
-// @description  Simple Userscript to allow the OneClick buttons to install to your Quest over ADB right from your browser. for bsaber.com
+// @description  Simple Userscript to allow the OneClick buttons to install to your Quest over ADB right from your browser.
 // @author       Alteran
 // @match        https://bsaber.com/*
 // @match        https://beatsaver.com/*
