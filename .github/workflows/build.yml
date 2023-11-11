@@ -23,4 +23,3 @@ jobs:
       with:
         name: index-user-js
         path: dist/index.user.js
-        artifact-content-type: 'text/javascript'
