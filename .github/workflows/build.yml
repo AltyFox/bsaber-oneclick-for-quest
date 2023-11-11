@@ -18,3 +18,8 @@ jobs:
       run: npm install
     - name: Build
       run: npm run build
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: index-user-js
+        path: dist/index.user.js
