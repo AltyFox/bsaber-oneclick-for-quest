@@ -6,8 +6,9 @@
 // @author       Alteran
 // @match        https://bsaber.com/*
 // @match        https://beatsaver.com/*
-// @grant        none
+// @grant        GM_xmlhttpRequest
+// @grant        GM_addStyle
 // @downloadURL  https://bsquest.xyz/bsaber_oneclick/script.user.js
 // @updateURL    https://bsquest.xyz/bsaber_oneclick/script.user.js
-// @require      https://raw.githubusercontent.com/Stuk/jszip/main/dist/jszip.js
+
 // ==/UserScript==
