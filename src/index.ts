@@ -48,6 +48,7 @@ class QuestAdbHandler {
   AdbTransport: AdbTransport;
   Adb: Adb;
   Sync: AdbSync;
+  ActiveTransfer: boolean;
   TransferQueue: [];
 
   // Define a helper function to convert a Blob to a Uint8Array
@@ -60,6 +61,8 @@ class QuestAdbHandler {
   async ProcessQueue() {
     // If the queue is empty or there is an active transfer, return
     if (this.TransferQueue.length == 0) return;
+    if (this.ActiveTransfer) return;
+    this.ActiveTransfer = true;
 
     // Set the active transfer flag to true and get the first item in the queue
     const transfer = this.TransferQueue.shift();
@@ -101,6 +104,7 @@ class QuestAdbHandler {
 
           // Set a timeout to reset the active transfer flag and process the queue after a delay
           setTimeout(() => {
+            this.ActiveTransfer = false;
             self.ProcessQueue();
           }, 800);
 
@@ -200,9 +204,48 @@ class QuestAdbHandler {
   }
 
   // Define a function to install a beatmap
+  async installPlaylist(playlistUrl) {
+    console.log(playlistUrl);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    GM_xmlhttpRequest({
+      method: 'GET',
+      url: playlistUrl,
+      responseType: 'json',
+      onload: async (response) => {
+        const data = response.response;
+        const playlistBlob = new Blob([JSON.stringify(data)], {
+          type: 'application/json',
+        });
+        this.toArray(playlistBlob, async (array) => {
+          const file = new ReadableStream({
+            start(controller) {
+              controller.enqueue(new Consumable(array));
+              controller.close();
+            },
+          });
+          const filename = `/sdcard/ModData/com.beatgames.beatsaber/Mods/PlaylistManager/Playlists/${playlistUrl
+            .split('/')
+            .pop()}`;
+          (await self.getSync()).write({
+            filename: filename,
+            file: file,
+          });
+        });
+        for (const song of data.songs) {
+          console.log(song);
+          const songBsr = song.key;
+          // Do something with the song hash here
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          await this.installBeatmap(songBsr);
+        }
+      },
+    });
+  }
   async installBeatmap(bsr) {
     // Define the URL to request
     const url = 'https://api.beatsaver.com/maps/id/' + bsr;
+    console.log(url);
 
     // Send a GET request to the URL and extract the download URL and original name from the response
     GM_xmlhttpRequest({
@@ -261,11 +304,17 @@ let adbHandler = null;
 document.addEventListener('click', async function (event) {
   let targetDest;
 
-  // Check if the clicked element or its parent has a beatsaver URL
+  // Check if the clicked element or its parent has a beatsaver or bsplaylist URL
   if (event.target.parentElement && event.target.parentElement.attributes[0]) {
     if (
       event.target.parentElement.attributes[0].nodeValue.startsWith(
         'beatsaver://',
+      )
+    ) {
+      targetDest = event.target.parentElement.attributes[0].nodeValue;
+    } else if (
+      event.target.parentElement.attributes[0].nodeValue.startsWith(
+        'bsplaylist://',
       )
     ) {
       targetDest = event.target.parentElement.attributes[0].nodeValue;
@@ -275,16 +324,24 @@ document.addEventListener('click', async function (event) {
   if (event.target.attributes[0]) {
     if (event.target.attributes[0].nodeValue.startsWith('beatsaver://')) {
       targetDest = event.target.attributes[0].nodeValue;
+    } else if (
+      event.target.attributes[0].nodeValue.startsWith('bsplaylist://')
+    ) {
+      targetDest = event.target.attributes[0].nodeValue;
     }
   }
 
   if (event.target.attributes[1]) {
     if (event.target.attributes[1].nodeValue.startsWith('beatsaver://')) {
       targetDest = event.target.attributes[1].nodeValue;
+    } else if (
+      event.target.attributes[1].nodeValue.startsWith('bsplaylist://')
+    ) {
+      targetDest = event.target.attributes[1].nodeValue;
     }
   }
 
-  // If there is no beatsaver URL, return
+  // If there is no beatsaver or bsplaylist URL, return
   if (!targetDest) {
     return;
   }
@@ -299,7 +356,12 @@ document.addEventListener('click', async function (event) {
     await adbHandler.init();
   }
 
-  // Extract the beatmap ID from the beatsaver URL and install the beatmap
-  const bsr = targetDest.replace('beatsaver://', '');
-  adbHandler.installBeatmap(bsr);
+  // Extract the beatmap ID or playlist ID from the beatsaver or bsplaylist URL and install the beatmap or playlist
+  if (targetDest.startsWith('beatsaver://')) {
+    const bsr = targetDest.replace('beatsaver://', '');
+    adbHandler.installBeatmap(bsr);
+  } else if (targetDest.startsWith('bsplaylist://')) {
+    const playlistUrl = targetDest.replace('bsplaylist://playlist/', '');
+    adbHandler.installPlaylist(playlistUrl);
+  }
 });
