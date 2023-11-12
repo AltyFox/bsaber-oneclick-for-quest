@@ -21,7 +21,6 @@
     "@babel/runtime": "^7.22.10",
     "@yume-chan/adb-credential-web": "^0.0.21",
     "@yume-chan/adb-daemon-webusb": "^0.0.21",
-    "fflate": "^0.8.1",
     "notyf": "^3.10.0"
   },
   "devDependencies": {
