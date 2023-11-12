@@ -48,7 +48,6 @@ class QuestAdbHandler {
   AdbTransport: AdbTransport;
   Adb: Adb;
   Sync: AdbSync;
-  ActiveTransfer: boolean;
   TransferQueue: [];
 
   // Define a helper function to convert a Blob to a Uint8Array
@@ -61,10 +60,8 @@ class QuestAdbHandler {
   async ProcessQueue() {
     // If the queue is empty or there is an active transfer, return
     if (this.TransferQueue.length == 0) return;
-    if (this.ActiveTransfer == true) return;
 
     // Set the active transfer flag to true and get the first item in the queue
-    this.ActiveTransfer = true;
     const transfer = this.TransferQueue.shift();
     if (!transfer) return;
 
@@ -87,7 +84,7 @@ class QuestAdbHandler {
       });
       (await self.getSync())
         .write({
-          filename: '/sdcard/tmp.zip',
+          filename: '/sdcard/' + bsr + '.zip',
           file: file,
         })
         .then(async () => {
@@ -108,7 +105,6 @@ class QuestAdbHandler {
 
           // Set a timeout to reset the active transfer flag and process the queue after a delay
           setTimeout(() => {
-            self.ActiveTransfer = false;
             self.ProcessQueue();
           }, 800);
 
@@ -187,7 +183,6 @@ class QuestAdbHandler {
   // Define a function to initialize the class
   async init() {
     // Set the class properties and generate the ADB credentials
-    this.ActiveTransfer = false;
     this.TransferQueue = [];
     this.Device = await this.getDevice();
     this.Connection = await this.getConnection();
