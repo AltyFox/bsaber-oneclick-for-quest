@@ -69,7 +69,7 @@ class QuestAdbHandler {
     if (!transfer) return;
 
     // Extract the blob, transfer notification, zip path, and original name from the transfer object
-    const { blob, transferNotyf, zipPath, originalName } = transfer;
+    const { blob, transferNotyf, zipPath, originalName, bsr } = transfer;
     const thisFileCount = 0;
 
     console.log(thisFileCount);
@@ -92,21 +92,18 @@ class QuestAdbHandler {
         })
         .then(async () => {
           // Unzip the file on the device and delete the temporary file
-          console.log(
-            "mkdir -p $(dirname '" +
-              zipPath +
-              "') 2>/dev/null && unzip /sdcard/tmp.zip -d '" +
-              zipPath +
-              "' && unlink /sdcard/tmp.zip",
-          );
           await (
             await self.getAdb()
           ).subprocess.spawn(
             "mkdir -p $(dirname '" +
               zipPath +
-              "') 2>/dev/null && unzip /sdcard/tmp.zip -d '" +
+              "') 2>/dev/null && unzip /sdcard/" +
+              bsr +
+              ".zip -d '" +
               zipPath +
-              "' && unlink /sdcard/tmp.zip",
+              "' && unlink /sdcard/" +
+              bsr +
+              '.zip',
           );
 
           // Set a timeout to reset the active transfer flag and process the queue after a delay
@@ -123,6 +120,10 @@ class QuestAdbHandler {
           });
         });
     });
+  }
+
+  async getDevices() {
+    return await Manager.getDevices();
   }
 
   // Define a function to get the connected device
@@ -194,6 +195,17 @@ class QuestAdbHandler {
     this.Adb = await this.getAdb();
     this.Sync = await this.getSync();
 
+    setInterval(async () => {
+      if ((await this.getDevices()).length == 0) {
+        this.Device = null;
+        this.Connection = null;
+        this.CredentialStore = null;
+        this.AdbTransport = null;
+        this.Adb = null;
+        this.Sync = null;
+      }
+    }, 500);
+
     (await this.getCredentialStore()).generateKey().then(async function () {
       console.log('Got Credentials');
     });
@@ -245,6 +257,7 @@ class QuestAdbHandler {
               transferNotyf,
               zipPath,
               originalName,
+              bsr,
             });
             this.ProcessQueue();
           },
