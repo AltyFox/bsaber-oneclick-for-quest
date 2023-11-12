@@ -67,10 +67,6 @@ class QuestAdbHandler {
 
     // Extract the blob, transfer notification, zip path, and original name from the transfer object
     const { blob, transferNotyf, zipPath, originalName, bsr } = transfer;
-    const thisFileCount = 0;
-
-    console.log(thisFileCount);
-    console.log('Transferring ' + zipPath);
 
     // Convert the blob to a ReadableStream and write it to the device
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -127,7 +123,6 @@ class QuestAdbHandler {
     if (!this.Device) {
       this.Device = await Manager.requestDevice();
     }
-    console.log(this.Device);
     return this.Device;
   }
 
@@ -201,9 +196,7 @@ class QuestAdbHandler {
       }
     }, 500);
 
-    (await this.getCredentialStore()).generateKey().then(async function () {
-      console.log('Got Credentials');
-    });
+    (await this.getCredentialStore()).generateKey();
   }
 
   // Define a function to install a beatmap
@@ -233,7 +226,6 @@ class QuestAdbHandler {
           responseType: 'blob',
           onload: (response) => {
             const blob = response.response;
-            console.log(this.TransferQueue);
 
             // Dismiss the downloading notification and display a transfer notification
             notyf.dismiss(downloadNotyf);
@@ -267,7 +259,6 @@ let adbHandler = null;
 
 // Add a click event listener to the document
 document.addEventListener('click', async function (event) {
-  console.log(event);
   let targetDest;
 
   // Check if the clicked element or its parent has a beatsaver URL
@@ -297,8 +288,6 @@ document.addEventListener('click', async function (event) {
   if (!targetDest) {
     return;
   }
-
-  console.log(targetDest);
 
   // Prevent the default click action
   event.stopPropagation();
