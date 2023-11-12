@@ -22,4 +22,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: index-user-js
-        path: dist/index.user.js
+        path: dist/*.js
