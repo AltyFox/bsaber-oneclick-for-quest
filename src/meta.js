@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Quest OneClick Installer
 // @namespace    https://bsaber.com/
-// @version      1.1.10
+// @version      1.1.11
 // @description  Simple Userscript to allow the OneClick buttons to install to your Quest over ADB right from your browser.
 // @author       Alteran
 // @match        https://bsaber.com/*
