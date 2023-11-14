@@ -41,6 +41,7 @@ class QuestAdbHandler {
   Adb: Adb;
   Sync: AdbSync;
   ActiveTransfer: boolean;
+  ActiveDownload: boolean;
   TransferQueue: [];
 
   // Define a helper function to convert a Blob to a Uint8Array
@@ -61,14 +62,7 @@ class QuestAdbHandler {
     if (!transfer) return;
 
     // Extract the blob, transfer notification, zip path, and original name from the transfer object
-    const {
-      blob,
-      transferToast,
-      zipPath,
-      originalName,
-      bsr,
-      playlistCount = '',
-    } = transfer;
+    const { blob, zipPath, originalName, bsr, playlistCount = '' } = transfer;
 
     // Convert the blob to a ReadableStream and write it to the device
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -107,16 +101,13 @@ class QuestAdbHandler {
             self.ProcessQueue();
           }, 500);
 
-          // Dismiss the transfer notification and display a success notification
-          transferToast.hideToast();
-
           Toastify({
             text:
               playlistCount +
               ' ' +
               originalName +
               ' finished transferring to device.',
-            duration: 3000,
+            duration: 2000,
             newWindow: true,
             close: false,
             gravity: 'bottom', // `top` or `bottom`
@@ -250,7 +241,17 @@ class QuestAdbHandler {
           console.log(song);
           const songBsr = song.key;
           // Do something with the song hash here
-          await new Promise((resolve) => setTimeout(resolve, 500));
+          //
+          await new Promise<void>((resolve) => {
+            const checkDownloadStatus = () => {
+              if (!this.ActiveDownload) {
+                clearInterval(intervalId);
+                resolve();
+              }
+            };
+            const intervalId = setInterval(checkDownloadStatus, 100);
+          });
+
           const playlistCount = `${i + 1}/${data.songs.length}`;
           await this.installBeatmap(songBsr, playlistCount);
         }
@@ -261,6 +262,7 @@ class QuestAdbHandler {
     // Define the URL to request
     const url = 'https://api.beatsaver.com/maps/id/' + bsr;
     console.log(url);
+    this.ActiveDownload = true;
 
     // Send a GET request to the URL and extract the download URL and original name from the response
     GM_xmlhttpRequest({
@@ -286,11 +288,17 @@ class QuestAdbHandler {
           onClick: function () {}, // Callback after click
         });
         downloadToast.showToast();
+
         GM_xmlhttpRequest({
           method: 'GET',
           url: downloadURL,
           responseType: 'blob',
+          onprogress: (event) => {
+            const progress = Math.round((event.loaded / event.total) * 100);
+            downloadToast.toastElement.innerText = `${playlistCount} Downloading ${originalName} ${progress}%`;
+          },
           onload: (response) => {
+            this.ActiveDownload = false;
             const blob = response.response;
 
             // Dismiss the downloading notification and display a transfer notification
@@ -298,7 +306,7 @@ class QuestAdbHandler {
             const transferToast = Toastify({
               text:
                 playlistCount + ' Transferring ' + originalName + ' to device!',
-              duration: 0,
+              duration: 2000,
               newWindow: true,
               close: false,
               gravity: 'bottom', // `top` or `bottom`
@@ -318,7 +326,6 @@ class QuestAdbHandler {
               zipName;
             this.TransferQueue.push({
               blob,
-              transferToast,
               zipPath,
               originalName,
               bsr,
@@ -335,7 +342,6 @@ class QuestAdbHandler {
 // Initialize the adbHandler variable to null
 let adbHandler = null;
 
-// Add a click event listener to the document
 document.addEventListener('click', async function (event) {
   let targetDest;
 
