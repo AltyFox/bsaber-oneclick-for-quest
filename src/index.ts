@@ -48,6 +48,7 @@ class QuestAdbHandler {
   Sync: AdbSync;
   ActiveTransfer: boolean;
   ActiveDownloadCount: number;
+  InstalledSongs: object;
   TransferQueue: [];
 
   // Define a helper function to convert a Blob to a Uint8Array
@@ -57,28 +58,33 @@ class QuestAdbHandler {
   };
 
   async getInstalledSongs() {
-    const content = (await this.getSync()).read(
-      '/sdcard/ModData/com.beatgames.beatsaber/Configs/SongLoader.json',
-    );
-    const chunks = [];
-    await content.pipeTo(
-      new WritableStream({
-        write(chunk) {
-          chunks.push(chunk);
-        },
-      }),
-    );
-    const concatenated = new Uint8Array(
-      chunks.reduce((acc, chunk) => acc + chunk.length, 0),
-    );
-    let offset = 0;
-    for (const chunk of chunks) {
-      concatenated.set(chunk, offset);
-      offset += chunk.length;
+    if (Object.keys(this.InstalledSongs).length === 0) {
+      const content = (await this.getSync()).read(
+        '/sdcard/ModData/com.beatgames.beatsaber/Configs/SongLoader.json',
+      );
+      const chunks = [];
+      await content.pipeTo(
+        new WritableStream({
+          write(chunk) {
+            chunks.push(chunk);
+          },
+        }),
+      );
+      const concatenated = new Uint8Array(
+        chunks.reduce((acc, chunk) => acc + chunk.length, 0),
+      );
+      let offset = 0;
+      for (const chunk of chunks) {
+        concatenated.set(chunk, offset);
+        offset += chunk.length;
+      }
+      const text = new TextDecoder().decode(concatenated);
+      const songs = JSON.parse(text);
+      this.InstalledSongs = songs;
+      return songs;
+    } else {
+      return this.InstalledSongs;
     }
-    const text = new TextDecoder().decode(concatenated);
-    const songs = JSON.parse(text);
-    return songs;
   }
 
   async getInstalledBplist() {
@@ -264,6 +270,7 @@ class QuestAdbHandler {
     this.Adb = await this.getAdb();
     this.Sync = await this.getSync();
     this.ActiveDownloadCount = 0;
+    this.InstalledSongs = {};
 
     setInterval(async () => {
       if ((await this.getDevices()).length == 0) {
@@ -328,6 +335,8 @@ class QuestAdbHandler {
           });
 
           const playlistCount = `${i + 1}/${data.songs.length}`;
+
+          await new Promise((resolve) => setTimeout(resolve, 100));
           await this.installBeatmap(songBsr, playlistCount);
         }
       },
@@ -337,7 +346,6 @@ class QuestAdbHandler {
     // Define the URL to request
     const url = 'https://api.beatsaver.com/maps/id/' + bsr;
     console.log(url);
-    this.ActiveDownloadCount++;
 
     // Send a GET request to the URL and extract the download URL and original name from the response
     GM_xmlhttpRequest({
@@ -369,10 +377,9 @@ class QuestAdbHandler {
             },
             onClick: function () {}, // Callback after click
           }).showToast();
-          await new Promise((resolve) => setTimeout(resolve, 1000));
           return;
         }
-
+        this.ActiveDownloadCount++;
         console.log(installedSongs);
         console.log(songHash);
 

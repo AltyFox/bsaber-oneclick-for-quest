@@ -8,7 +8,7 @@
 // @match        https://beatsaver.com/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_addStyle
-// @downloadURL  https://bsquest.xyz/bsaber_oneclick/script.user.js
-// @updateURL    https://bsquest.xyz/bsaber_oneclick/script.user.js
+// @downloadURL  https://bsquest.xyz/bsaber_oneclick/index.user.js
+// @updateURL    https://bsquest.xyz/bsaber_oneclick/index.user.js
 
 // ==/UserScript==
