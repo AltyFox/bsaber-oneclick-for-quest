@@ -31,6 +31,9 @@ GM_addStyle(
 const downloadingCSS = 'darkorange';
 const completeCSS = 'green';
 
+let globalPlaylists = [];
+let globalSongs = [];
+
 // Define the QuestAdbHandler class
 class QuestAdbHandler {
   // Define class properties
@@ -49,6 +52,86 @@ class QuestAdbHandler {
     const promise = blob.arrayBuffer();
     promise.then((buffer) => callback(new Uint8Array(buffer)));
   };
+
+  async getInstalledSongs() {
+    globalSongs = [];
+    const songListProc = await (
+      await this.getAdb()
+    ).subprocess.spawn(
+      'find /sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels -name "Info.dat" -o -name "info.dat"',
+    );
+    const infoDats = [];
+    let reading = true; // Initialize reading to true
+    await songListProc.stdout.pipeThrough(new DecodeUtf8Stream()).pipeTo(
+      new WritableStream<string>({
+        write(chunk) {
+          const strippedChunk = chunk.replace(/\n$/, ''); // strip newline character from end of chunk
+          infoDats.push(strippedChunk);
+        },
+        close() {
+          reading = false; // Set reading to false when done
+        },
+      }),
+    );
+    while (reading) {
+      // Wait for reading to be false
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
+    for (const path of infoDats) {
+      console.log(path);
+      const content = (await this.getSync()).read(path);
+      const datChunks = [];
+      await content.pipeTo(
+        new WritableStream({
+          write(chunk) {
+            datChunks.push(chunk);
+          },
+        }),
+      );
+      const concatenated = new Uint8Array(
+        datChunks.reduce((acc, chunk) => acc + chunk.length, 0),
+      );
+      let offset = 0;
+      for (const chunk of datChunks) {
+        concatenated.set(chunk, offset);
+        offset += chunk.length;
+      }
+      const text = new TextDecoder().decode(concatenated);
+      globalSongs.push(JSON.parse(text));
+    }
+  }
+  async getInstalledBplist() {
+    globalPlaylists = [];
+    const entries = (await this.getSync()).readdir(
+      '/sdcard/ModData/com.beatgames.beatsaber/Mods/PlaylistManager/Playlists/',
+    );
+    for (const entry of await entries) {
+      console.log(entry.name);
+      const content = (await this.getSync()).read(
+        '/sdcard/ModData/com.beatgames.beatsaber/Mods/PlaylistManager/Playlists/' +
+          entry.name,
+      );
+      const chunks = [];
+      await content.pipeTo(
+        new WritableStream({
+          write(chunk) {
+            chunks.push(chunk);
+          },
+        }),
+      );
+      const concatenated = new Uint8Array(
+        chunks.reduce((acc, chunk) => acc + chunk.length, 0),
+      );
+      let offset = 0;
+      for (const chunk of chunks) {
+        concatenated.set(chunk, offset);
+        offset += chunk.length;
+      }
+      const text = new TextDecoder().decode(concatenated);
+      globalPlaylists.push(JSON.parse(text));
+    }
+  }
 
   // Define a function to process the transfer queue
   async ProcessQueue() {
@@ -107,7 +190,7 @@ class QuestAdbHandler {
           setTimeout(() => {
             this.ActiveTransfer = false;
             self.ProcessQueue();
-          }, 500);
+          }, 0);
 
           Toastify({
             text:
@@ -214,6 +297,8 @@ class QuestAdbHandler {
     }, 500);
 
     (await this.getCredentialStore()).generateKey();
+    this.getInstalledSongs();
+    this.getInstalledBplist();
   }
 
   // Define a function to install a beatmap
