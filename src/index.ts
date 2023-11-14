@@ -59,6 +59,16 @@ class QuestAdbHandler {
 
   async getInstalledSongs() {
     if (Object.keys(this.InstalledSongs).length === 0) {
+      try {
+        await (
+          await this.getSync()
+        ).stat(
+          '/sdcard/ModData/com.beatgames.beatsaber/Configs/SongLoader.json',
+        );
+      } catch {
+        return {};
+      }
+
       const content = (await this.getSync()).read(
         '/sdcard/ModData/com.beatgames.beatsaber/Configs/SongLoader.json',
       );
