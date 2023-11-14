@@ -10,7 +10,8 @@ import {
   AdbTransport,
 } from '@yume-chan/adb';
 import AdbWebCredentialStore from '@yume-chan/adb-credential-web';
-import { Consumable } from '@yume-chan/stream-extra';
+import { Consumable, DecodeUtf8Stream } from '@yume-chan/stream-extra';
+
 //import { encodeUtf8 } from '@yume-chan/adb';
 import Toastify from 'toastify-js';
 const Manager = AdbDaemonWebUsbDeviceManager.BROWSER;
@@ -28,7 +29,6 @@ GM_addStyle(
 );
 
 const downloadingCSS = 'darkorange';
-const transferringCSS = 'darkblue';
 const completeCSS = 'green';
 
 // Define the QuestAdbHandler class
@@ -41,7 +41,7 @@ class QuestAdbHandler {
   Adb: Adb;
   Sync: AdbSync;
   ActiveTransfer: boolean;
-  ActiveDownload: boolean;
+  ActiveDownloadCount: number;
   TransferQueue: [];
 
   // Define a helper function to convert a Blob to a Uint8Array
@@ -81,18 +81,26 @@ class QuestAdbHandler {
         })
         .then(async () => {
           // Unzip the file on the device and delete the temporary file
-          await (
+          const extractProc = await (
             await self.getAdb()
           ).subprocess.spawn(
             "mkdir -p $(dirname '" +
               zipPath +
-              "') 2>/dev/null && unzip /sdcard/" +
+              "') 2>/dev/null && unzip -o /sdcard/" +
               bsr +
               ".zip -d '" +
               zipPath +
               "' && unlink /sdcard/" +
               bsr +
               '.zip',
+          );
+
+          await extractProc.stdout.pipeThrough(new DecodeUtf8Stream()).pipeTo(
+            new WritableStream<string>({
+              write(chunk) {
+                console.log(chunk);
+              },
+            }),
           );
 
           // Set a timeout to reset the active transfer flag and process the queue after a delay
@@ -192,6 +200,7 @@ class QuestAdbHandler {
     this.CredentialStore = await this.getCredentialStore();
     this.Adb = await this.getAdb();
     this.Sync = await this.getSync();
+    this.ActiveDownloadCount = 0;
 
     setInterval(async () => {
       if ((await this.getDevices()).length == 0) {
@@ -244,7 +253,8 @@ class QuestAdbHandler {
           //
           await new Promise<void>((resolve) => {
             const checkDownloadStatus = () => {
-              if (!this.ActiveDownload) {
+              console.log(self.ActiveDownloadCount);
+              if (self.ActiveDownloadCount < 5) {
                 clearInterval(intervalId);
                 resolve();
               }
@@ -262,7 +272,7 @@ class QuestAdbHandler {
     // Define the URL to request
     const url = 'https://api.beatsaver.com/maps/id/' + bsr;
     console.log(url);
-    this.ActiveDownload = true;
+    this.ActiveDownloadCount++;
 
     // Send a GET request to the URL and extract the download URL and original name from the response
     GM_xmlhttpRequest({
@@ -298,26 +308,11 @@ class QuestAdbHandler {
             downloadToast.toastElement.innerText = `${playlistCount} Downloading ${originalName} ${progress}%`;
           },
           onload: (response) => {
-            this.ActiveDownload = false;
+            this.ActiveDownloadCount--;
             const blob = response.response;
 
             // Dismiss the downloading notification and display a transfer notification
             downloadToast.hideToast();
-            const transferToast = Toastify({
-              text:
-                playlistCount + ' Transferring ' + originalName + ' to device!',
-              duration: 2000,
-              newWindow: true,
-              close: false,
-              gravity: 'bottom', // `top` or `bottom`
-              position: 'right', // `left`, `center` or `right`
-              stopOnFocus: false, // Prevents dismissing of toast on hover
-              style: {
-                background: transferringCSS,
-              },
-              onClick: function () {}, // Callback after click
-            });
-            transferToast.showToast();
 
             // Add the beatmap file to the transfer queue and process the queue
             const zipName = url.substring(url.lastIndexOf('/') + 1);
@@ -391,8 +386,11 @@ document.addEventListener('click', async function (event) {
       targetDest = val4;
     } else if (val4.startsWith(check3)) {
       targetDest = val4;
+    } else if (val4.endsWith('.bplist')) {
+      targetDest = val4;
     }
   }
+
   console.log(targetDest);
   // If there is no beatsaver or bsplaylist URL, return
   if (!targetDest) {
@@ -417,6 +415,8 @@ document.addEventListener('click', async function (event) {
     const playlistUrl = targetDest.replace('bsplaylist://playlist/', '');
     adbHandler.installPlaylist(playlistUrl);
   } else if (targetDest.startsWith('https://api.beatsaver.com/playlists/id/')) {
+    adbHandler.installPlaylist(targetDest);
+  } else if (targetDest.endsWith('.bplist')) {
     adbHandler.installPlaylist(targetDest);
   }
 });
