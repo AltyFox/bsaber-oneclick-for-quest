@@ -297,8 +297,8 @@ class QuestAdbHandler {
     }, 500);
 
     (await this.getCredentialStore()).generateKey();
-    this.getInstalledSongs();
-    this.getInstalledBplist();
+    //  this.getInstalledSongs();
+    // this.getInstalledBplist();
   }
 
   // Define a function to install a beatmap
