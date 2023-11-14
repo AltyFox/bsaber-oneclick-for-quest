@@ -22,13 +22,14 @@
     "@babel/runtime": "^7.22.10",
     "@yume-chan/adb-credential-web": "^0.0.21",
     "@yume-chan/adb-daemon-webusb": "^0.0.21",
-    "notyf": "^3.10.0",
-    "terser": "^5.24.0"
+    "terser": "^5.24.0",
+    "toastify-js": "^1.12.0"
   },
   "devDependencies": {
     "@babel/plugin-transform-react-jsx": "^7.22.5",
     "@gera2ld/plaid": "~2.6.0",
     "@gera2ld/plaid-rollup": "~2.6.0",
+    "@types/toastify-js": "^1.12.3",
     "@unocss/postcss": "^0.55.2",
     "@violentmonkey/types": "^0.1.5",
     "babel-preset-solid": "^1.7.7",

@@ -12,32 +12,24 @@ import {
 import AdbWebCredentialStore from '@yume-chan/adb-credential-web';
 import { Consumable } from '@yume-chan/stream-extra';
 //import { encodeUtf8 } from '@yume-chan/adb';
-import { Notyf } from 'notyf';
+import Toastify from 'toastify-js';
 const Manager = AdbDaemonWebUsbDeviceManager.BROWSER;
 
-const notyf = new Notyf({
-  dismissible: false,
-  duration: 0,
-  ripple: true,
-  types: [
-    {
-      type: 'info',
-      background: 'darkblue',
-    },
-    {
-      type: 'downloading',
-      background: 'darkorange',
-    },
-  ],
-});
-
 GM_addStyle(
-  `.notyf,.notyf__toast{box-sizing:border-box}@-webkit-keyframes notyf-fadeinup{0%{opacity:0;transform:translateY(25%)}to{opacity:1;transform:translateY(0)}}@keyframes notyf-fadeinup{0%{opacity:0;transform:translateY(25%)}to{opacity:1;transform:translateY(0)}}@-webkit-keyframes notyf-fadeinleft{0%{opacity:0;transform:translateX(25%)}to{opacity:1;transform:translateX(0)}}@keyframes notyf-fadeinleft{0%{opacity:0;transform:translateX(25%)}to{opacity:1;transform:translateX(0)}}@-webkit-keyframes notyf-fadeoutright{0%{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(25%)}}@keyframes notyf-fadeoutright{0%{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(25%)}}@-webkit-keyframes notyf-fadeoutdown{0%{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(25%)}}@keyframes notyf-fadeoutdown{0%{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(25%)}}@-webkit-keyframes ripple{0%{transform:scale(0) translateY(-45%) translateX(13%)}to{transform:scale(1) translateY(-45%) translateX(13%)}}@keyframes ripple{0%{transform:scale(0) translateY(-45%) translateX(13%)}to{transform:scale(1) translateY(-45%) translateX(13%)}}.notyf{position:fixed;top:0;left:0;height:100%;width:100%;color:#fff;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-end;pointer-events:none;padding:20px}.notyf__icon--error,.notyf__icon--success{height:21px;width:21px;background:#fff;border-radius:50%;display:block;margin:0 auto;position:relative}.notyf__icon--error:after,.notyf__icon--error:before{content:"";background:currentColor;display:block;position:absolute;width:3px;border-radius:3px;left:9px;height:12px;top:5px}.notyf__icon--error:after{transform:rotate(-45deg)}.notyf__icon--error:before{transform:rotate(45deg)}.notyf__icon--success:after,.notyf__icon--success:before{content:"";background:currentColor;display:block;position:absolute;width:3px;border-radius:3px}.notyf__icon--success:after{height:6px;transform:rotate(-45deg);top:9px;left:6px}.notyf__icon--success:before{height:11px;transform:rotate(45deg);top:5px;left:10px}.notyf__toast{display:block;overflow:hidden;pointer-events:auto;-webkit-animation:.3s ease-in forwards notyf-fadeinup;animation:.3s ease-in forwards notyf-fadeinup;box-shadow:0 3px 7px 0 rgba(0,0,0,.25);position:relative;padding:0 15px;border-radius:2px;max-width:300px;transform:translateY(25%);flex-shrink:0}.notyf__toast--disappear{transform:translateY(0);-webkit-animation:.3s .25s forwards notyf-fadeoutdown;animation:.3s .25s forwards notyf-fadeoutdown}.notyf__toast--disappear .notyf__icon,.notyf__toast--disappear .notyf__message{-webkit-animation:.3s forwards notyf-fadeoutdown;animation:.3s forwards notyf-fadeoutdown;opacity:1;transform:translateY(0)}.notyf__toast--disappear .notyf__dismiss{-webkit-animation:.3s forwards notyf-fadeoutright;animation:.3s forwards notyf-fadeoutright;opacity:1;transform:translateX(0)}.notyf__toast--disappear .notyf__message{-webkit-animation-delay:.05s;animation-delay:.05s}.notyf__toast--upper{margin-bottom:20px}.notyf__toast--lower{margin-top:20px}.notyf__toast--dismissible .notyf__wrapper{padding-right:30px}.notyf__ripple{height:400px;width:400px;position:absolute;transform-origin:bottom right;right:0;top:0;border-radius:50%;transform:scale(0) translateY(-51%) translateX(13%);z-index:5;-webkit-animation:.4s ease-out forwards ripple;animation:.4s ease-out forwards ripple}.notyf__wrapper{display:flex;align-items:center;padding-top:17px;padding-bottom:17px;padding-right:15px;border-radius:3px;position:relative;z-index:10}.notyf__icon{width:22px;text-align:center;font-size:1.3em;opacity:0;-webkit-animation:.3s .3s forwards notyf-fadeinup;animation:.3s .3s forwards notyf-fadeinup;margin-right:13px}.notyf__dismiss{position:absolute;top:0;right:0;height:100%;width:26px;margin-right:-15px;-webkit-animation:.3s .35s forwards notyf-fadeinleft;animation:.3s .35s forwards notyf-fadeinleft;opacity:0}.notyf__dismiss-btn{background-color:rgba(0,0,0,.25);border:none;cursor:pointer;transition:opacity .2s,background-color .2s;outline:0;opacity:.35;height:100%;width:100%}.notyf__dismiss-btn:after,.notyf__dismiss-btn:before{content:"";background:#fff;height:12px;width:2px;border-radius:3px;position:absolute;left:calc(50% - 1px);top:calc(50% - 5px)}.notyf__dismiss-btn:after{transform:rotate(-45deg)}.notyf__dismiss-btn:before{transform:rotate(45deg)}.notyf__dismiss-btn:hover{opacity:.7;background-color:rgba(0,0,0,.15)}.notyf__dismiss-btn:active{opacity:.8}.notyf__message{font-size:.8em;vertical-align:middle;position:relative;opacity:0;-webkit-animation:.3s .25s forwards notyf-fadeinup;animation:.3s .25s forwards notyf-fadeinup;line-height:1.5em}@media only screen and (max-width:480px){.notyf{padding:0}.notyf__ripple{height:600px;width:600px;-webkit-animation-duration:.5s;animation-duration:.5s}.notyf__toast{max-width:none;border-radius:0;box-shadow:0 -2px 7px 0 rgba(0,0,0,.13);width:100%}.notyf__dismiss{width:56px}}
-  // Define the tooltip content for the One-Click install button
-  // and append it to the DOM
+  `/*!
+  * Toastify js 1.12.0
+  * https://github.com/apvarun/toastify-js
+  * @license MIT licensed
+  *
+  * Copyright (C) 2018 Varun A P
+  */.toast-close,.toastify{color:#fff;cursor:pointer}.toastify{padding:12px 20px;display:inline-block;box-shadow:0 3px 6px -1px rgba(0,0,0,.12),0 10px 36px -4px rgba(77,96,232,.3);background:-webkit-linear-gradient(315deg,#73a5ff,#5477f5);background:linear-gradient(135deg,#73a5ff,#5477f5);position:fixed;opacity:0;transition:.4s cubic-bezier(.215, .61, .355, 1);border-radius:2px;text-decoration:none;max-width:calc(50% - 20px);z-index:2147483647}.toastify.on{opacity:1}.toast-close{background:0 0;border:0;font-family:inherit;font-size:1em;opacity:.4;padding:0 5px}.toastify-right{right:15px}.toastify-left{left:15px}.toastify-top{top:-150px}.toastify-bottom{bottom:-150px}.toastify-rounded{border-radius:25px}.toastify-avatar{width:1.5em;height:1.5em;margin:-7px 5px;border-radius:2px}.toastify-center{margin-left:auto;margin-right:auto;left:0;right:0;max-width:fit-content;max-width:-moz-fit-content}@media only screen and (max-width:360px){.toastify-left,.toastify-right{margin-left:auto;margin-right:auto;left:0;right:0;max-width:fit-content}}
   .bsaber-tooltip.-one-click::after {
     content: 'One-Click install to your Quest!';`,
 );
+
+const downloadingCSS = 'darkorange';
+const transferringCSS = 'darkblue';
+const completeCSS = 'green';
 
 // Define the QuestAdbHandler class
 class QuestAdbHandler {
@@ -69,7 +61,14 @@ class QuestAdbHandler {
     if (!transfer) return;
 
     // Extract the blob, transfer notification, zip path, and original name from the transfer object
-    const { blob, transferNotyf, zipPath, originalName, bsr } = transfer;
+    const {
+      blob,
+      transferToast,
+      zipPath,
+      originalName,
+      bsr,
+      playlistCount = '',
+    } = transfer;
 
     // Convert the blob to a ReadableStream and write it to the device
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -106,14 +105,28 @@ class QuestAdbHandler {
           setTimeout(() => {
             this.ActiveTransfer = false;
             self.ProcessQueue();
-          }, 800);
+          }, 500);
 
           // Dismiss the transfer notification and display a success notification
-          notyf.dismiss(transferNotyf);
-          notyf.success({
-            message: originalName + ' finished transferring!',
+          transferToast.hideToast();
+
+          Toastify({
+            text:
+              playlistCount +
+              ' ' +
+              originalName +
+              ' finished transferring to device.',
             duration: 3000,
-          });
+            newWindow: true,
+            close: false,
+            gravity: 'bottom', // `top` or `bottom`
+            position: 'right', // `left`, `center` or `right`
+            stopOnFocus: false, // Prevents dismissing of toast on hover
+            style: {
+              background: completeCSS,
+            },
+            onClick: function () {}, // Callback after click
+          }).showToast();
         });
     });
   }
@@ -232,17 +245,19 @@ class QuestAdbHandler {
             file: file,
           });
         });
-        for (const song of data.songs) {
+        for (let i = 0; i < data.songs.length; i++) {
+          const song = data.songs[i];
           console.log(song);
           const songBsr = song.key;
           // Do something with the song hash here
           await new Promise((resolve) => setTimeout(resolve, 500));
-          await this.installBeatmap(songBsr);
+          const playlistCount = `${i + 1}/${data.songs.length}`;
+          await this.installBeatmap(songBsr, playlistCount);
         }
       },
     });
   }
-  async installBeatmap(bsr) {
+  async installBeatmap(bsr, playlistCount = '') {
     // Define the URL to request
     const url = 'https://api.beatsaver.com/maps/id/' + bsr;
     console.log(url);
@@ -257,12 +272,20 @@ class QuestAdbHandler {
         const data = response.response;
         const downloadURL = data.versions[0].downloadURL;
         const originalName = data.name;
-
-        // Display a downloading notification and send a GET request to the download URL to get the beatmap file
-        const downloadNotyf = notyf.open({
-          type: 'downloading',
-          message: 'Downloading ' + originalName,
+        const downloadToast = Toastify({
+          text: playlistCount + ' Downloading ' + originalName,
+          duration: 0,
+          newWindow: true,
+          close: false,
+          gravity: 'bottom', // `top` or `bottom`
+          position: 'right', // `left`, `center` or `right`
+          stopOnFocus: false, // Prevents dismissing of toast on hover
+          style: {
+            background: downloadingCSS,
+          },
+          onClick: function () {}, // Callback after click
         });
+        downloadToast.showToast();
         GM_xmlhttpRequest({
           method: 'GET',
           url: downloadURL,
@@ -271,11 +294,22 @@ class QuestAdbHandler {
             const blob = response.response;
 
             // Dismiss the downloading notification and display a transfer notification
-            notyf.dismiss(downloadNotyf);
-            const transferNotyf = notyf.open({
-              type: 'info',
-              message: 'Transferring ' + originalName + ' to device!',
+            downloadToast.hideToast();
+            const transferToast = Toastify({
+              text:
+                playlistCount + ' Transferring ' + originalName + ' to device!',
+              duration: 0,
+              newWindow: true,
+              close: false,
+              gravity: 'bottom', // `top` or `bottom`
+              position: 'right', // `left`, `center` or `right`
+              stopOnFocus: false, // Prevents dismissing of toast on hover
+              style: {
+                background: transferringCSS,
+              },
+              onClick: function () {}, // Callback after click
             });
+            transferToast.showToast();
 
             // Add the beatmap file to the transfer queue and process the queue
             const zipName = url.substring(url.lastIndexOf('/') + 1);
@@ -284,10 +318,11 @@ class QuestAdbHandler {
               zipName;
             this.TransferQueue.push({
               blob,
-              transferNotyf,
+              transferToast,
               zipPath,
               originalName,
               bsr,
+              playlistCount,
             });
             this.ProcessQueue();
           },
@@ -304,43 +339,55 @@ let adbHandler = null;
 document.addEventListener('click', async function (event) {
   let targetDest;
 
-  // Check if the clicked element or its parent has a beatsaver or bsplaylist URL
-  if (event.target.parentElement && event.target.parentElement.attributes[0]) {
-    if (
-      event.target.parentElement.attributes[0].nodeValue.startsWith(
-        'beatsaver://',
-      )
-    ) {
-      targetDest = event.target.parentElement.attributes[0].nodeValue;
-    } else if (
-      event.target.parentElement.attributes[0].nodeValue.startsWith(
-        'bsplaylist://',
-      )
-    ) {
-      targetDest = event.target.parentElement.attributes[0].nodeValue;
+  const val1 = event.target.parentElement?.attributes[0]?.value;
+  const val2 = event.target.attributes[0]?.nodeValue;
+  const val3 = event.target.attributes[1]?.nodeValue;
+  const val4 = event.target.href;
+
+  const check1 = 'beatsaver://';
+  const check2 = 'bsplaylist://playlist/';
+  const check3 = 'https://api.beatsaver.com/playlists/id/';
+
+  if (val1) {
+    if (val1.startsWith(check1)) {
+      targetDest = val1;
+    } else if (val1.startsWith(check2)) {
+      targetDest = val1;
+    } else if (val1.startsWith(check3)) {
+      targetDest = val1;
     }
   }
 
-  if (event.target.attributes[0]) {
-    if (event.target.attributes[0].nodeValue.startsWith('beatsaver://')) {
-      targetDest = event.target.attributes[0].nodeValue;
-    } else if (
-      event.target.attributes[0].nodeValue.startsWith('bsplaylist://')
-    ) {
-      targetDest = event.target.attributes[0].nodeValue;
+  if (val2) {
+    if (val2.startsWith(check1)) {
+      targetDest = val2;
+    } else if (val2.startsWith(check2)) {
+      targetDest = val2;
+    } else if (val2.startsWith(check3)) {
+      targetDest = val2;
     }
   }
 
-  if (event.target.attributes[1]) {
-    if (event.target.attributes[1].nodeValue.startsWith('beatsaver://')) {
-      targetDest = event.target.attributes[1].nodeValue;
-    } else if (
-      event.target.attributes[1].nodeValue.startsWith('bsplaylist://')
-    ) {
-      targetDest = event.target.attributes[1].nodeValue;
+  if (val3) {
+    if (val3.startsWith(check1)) {
+      targetDest = val3;
+    } else if (val3.startsWith(check2)) {
+      targetDest = val3;
+    } else if (val3.startsWith(check3)) {
+      targetDest = val3;
     }
   }
 
+  if (val4) {
+    if (val4.startsWith(check1)) {
+      targetDest = val4;
+    } else if (val4.startsWith(check2)) {
+      targetDest = val4;
+    } else if (val4.startsWith(check3)) {
+      targetDest = val4;
+    }
+  }
+  console.log(targetDest);
   // If there is no beatsaver or bsplaylist URL, return
   if (!targetDest) {
     return;
@@ -355,7 +402,7 @@ document.addEventListener('click', async function (event) {
     adbHandler = new QuestAdbHandler();
     await adbHandler.init();
   }
-
+  console.log(targetDest);
   // Extract the beatmap ID or playlist ID from the beatsaver or bsplaylist URL and install the beatmap or playlist
   if (targetDest.startsWith('beatsaver://')) {
     const bsr = targetDest.replace('beatsaver://', '');
@@ -363,5 +410,7 @@ document.addEventListener('click', async function (event) {
   } else if (targetDest.startsWith('bsplaylist://')) {
     const playlistUrl = targetDest.replace('bsplaylist://playlist/', '');
     adbHandler.installPlaylist(playlistUrl);
+  } else if (targetDest.startsWith('https://api.beatsaver.com/playlists/id/')) {
+    adbHandler.installPlaylist(targetDest);
   }
 });
