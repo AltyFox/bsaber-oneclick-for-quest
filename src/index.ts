@@ -32,7 +32,10 @@ const downloadingCSS = 'darkorange';
 const completeCSS = 'green';
 
 let globalPlaylists = [];
-let globalSongs = [];
+
+setInterval(() => {
+  console.log('globalPlaylists:', globalPlaylists);
+}, 1000);
 
 // Define the QuestAdbHandler class
 class QuestAdbHandler {
@@ -54,53 +57,30 @@ class QuestAdbHandler {
   };
 
   async getInstalledSongs() {
-    globalSongs = [];
-    const songListProc = await (
-      await this.getAdb()
-    ).subprocess.spawn(
-      'find /sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels -name "Info.dat" -o -name "info.dat"',
+    const content = (await this.getSync()).read(
+      '/sdcard/ModData/com.beatgames.beatsaber/Configs/SongLoader.json',
     );
-    const infoDats = [];
-    let reading = true; // Initialize reading to true
-    await songListProc.stdout.pipeThrough(new DecodeUtf8Stream()).pipeTo(
-      new WritableStream<string>({
+    const chunks = [];
+    await content.pipeTo(
+      new WritableStream({
         write(chunk) {
-          const strippedChunk = chunk.replace(/\n$/, ''); // strip newline character from end of chunk
-          infoDats.push(strippedChunk);
-        },
-        close() {
-          reading = false; // Set reading to false when done
+          chunks.push(chunk);
         },
       }),
     );
-    while (reading) {
-      // Wait for reading to be false
-      await new Promise((resolve) => setTimeout(resolve, 100));
+    const concatenated = new Uint8Array(
+      chunks.reduce((acc, chunk) => acc + chunk.length, 0),
+    );
+    let offset = 0;
+    for (const chunk of chunks) {
+      concatenated.set(chunk, offset);
+      offset += chunk.length;
     }
-
-    for (const path of infoDats) {
-      console.log(path);
-      const content = (await this.getSync()).read(path);
-      const datChunks = [];
-      await content.pipeTo(
-        new WritableStream({
-          write(chunk) {
-            datChunks.push(chunk);
-          },
-        }),
-      );
-      const concatenated = new Uint8Array(
-        datChunks.reduce((acc, chunk) => acc + chunk.length, 0),
-      );
-      let offset = 0;
-      for (const chunk of datChunks) {
-        concatenated.set(chunk, offset);
-        offset += chunk.length;
-      }
-      const text = new TextDecoder().decode(concatenated);
-      globalSongs.push(JSON.parse(text));
-    }
+    const text = new TextDecoder().decode(concatenated);
+    const songs = JSON.parse(text);
+    return songs;
   }
+
   async getInstalledBplist() {
     globalPlaylists = [];
     const entries = (await this.getSync()).readdir(
@@ -297,8 +277,8 @@ class QuestAdbHandler {
     }, 500);
 
     (await this.getCredentialStore()).generateKey();
-    //  this.getInstalledSongs();
-    // this.getInstalledBplist();
+    this.getInstalledSongs();
+    this.getInstalledBplist();
   }
 
   // Define a function to install a beatmap
@@ -365,10 +345,37 @@ class QuestAdbHandler {
       url: url,
       responseType: 'json',
 
-      onload: (response) => {
+      onload: async (response) => {
         const data = response.response;
+        const songHash = data.versions[0].hash.toUpperCase();
+        const installedSongs = await this.getInstalledSongs();
+
+        const songAlreadyInstalled = Object.values(installedSongs).some(
+          (song) => song.sha1 === songHash,
+        );
         const downloadURL = data.versions[0].downloadURL;
         const originalName = data.name;
+        if (songAlreadyInstalled) {
+          Toastify({
+            text: playlistCount + originalName + ' is already installed!',
+            duration: 1000,
+            newWindow: true,
+            close: false,
+            gravity: 'bottom', // `top` or `bottom`
+            position: 'right', // `left`, `center` or `right`
+            stopOnFocus: false, // Prevents dismissing of toast on hover
+            style: {
+              background: completeCSS,
+            },
+            onClick: function () {}, // Callback after click
+          }).showToast();
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          return;
+        }
+
+        console.log(installedSongs);
+        console.log(songHash);
+
         const downloadToast = Toastify({
           text: playlistCount + ' Downloading ' + originalName,
           duration: 0,
