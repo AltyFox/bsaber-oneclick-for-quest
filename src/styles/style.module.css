@@ -8,3 +8,13 @@
 .plus1 {
   @apply float-right;
 }
+
+
+.modal {
+  width: 60%;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: pink;
+}

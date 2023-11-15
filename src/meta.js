@@ -10,5 +10,7 @@
 // @grant        GM_addStyle
 // @downloadURL  https://bsquest.xyz/bsaber_oneclick/index.user.js
 // @updateURL    https://bsquest.xyz/bsaber_oneclick/index.user.js
+// @require     https://cdn.jsdelivr.net/combine/npm/@violentmonkey/dom@2,npm/@violentmonkey/ui@0.7
+// @require     https://cdn.jsdelivr.net/npm/@violentmonkey/dom@2/dist/solid.js
 
 // ==/UserScript==

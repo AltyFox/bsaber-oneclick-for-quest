@@ -11,7 +11,8 @@ import {
 } from '@yume-chan/adb';
 import AdbWebCredentialStore from '@yume-chan/adb-credential-web';
 import { Consumable, DecodeUtf8Stream } from '@yume-chan/stream-extra';
-
+import { createSignal, Show } from 'solid-js';
+import { render } from 'solid-js/web';
 //import { encodeUtf8 } from '@yume-chan/adb';
 import Toastify from 'toastify-js';
 const Manager = AdbDaemonWebUsbDeviceManager.BROWSER;
@@ -58,6 +59,7 @@ class QuestAdbHandler {
   };
 
   async getInstalledSongs() {
+    console.log(this.InstalledSongs);
     if (Object.keys(this.InstalledSongs).length === 0) {
       try {
         await (
@@ -296,6 +298,9 @@ class QuestAdbHandler {
     (await this.getCredentialStore()).generateKey();
     this.getInstalledSongs();
     this.getInstalledBplist();
+    setInterval(() => {
+      console.log(this.InstalledSongs);
+    }, 1000);
   }
 
   // Define a function to install a beatmap
@@ -309,6 +314,19 @@ class QuestAdbHandler {
       responseType: 'json',
       onload: async (response) => {
         const data = response.response;
+
+        // Check if data matches an already existing playlist in globalPlaylist
+        const playlistExists = globalPlaylists.some((playlist) => {
+          return playlist.playlistTitle === data.playlistTitle;
+        });
+
+        // If data does not match an already existing playlist in globalPlaylist, push it
+        if (!playlistExists) {
+          globalPlaylists.push(data);
+        }
+
+        // END: abpxx6d04wxr
+
         const playlistBlob = new Blob([JSON.stringify(data)], {
           type: 'application/json',
         });
@@ -389,6 +407,7 @@ class QuestAdbHandler {
           }).showToast();
           return;
         }
+
         this.ActiveDownloadCount++;
         console.log(installedSongs);
         console.log(songHash);
@@ -435,6 +454,11 @@ class QuestAdbHandler {
               bsr,
               playlistCount,
             });
+
+            // Add an entry to InstalledSongs object
+            const songPath = `/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels/${bsr}`;
+            this.InstalledSongs[songPath] = { sha1: songHash };
+
             this.ProcessQueue();
           },
         });
@@ -529,3 +553,48 @@ document.addEventListener('click', async function (event) {
     adbHandler.installPlaylist(targetDest);
   }
 });
+
+GM_addStyle(`.modal {
+  width: 60%;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}`);
+
+function Modal() {
+  return (
+    <div class="modal">
+      <div id="playlists">List of Playlists</div>
+      <div id="playlistContent">List of Songs</div>
+    </div>
+  );
+}
+
+const App = () => {
+  const [show, setShow] = createSignal(false);
+  const showModal = () => {
+    const showCopy = show();
+    setShow(!showCopy);
+    console.log('showCopy' + showCopy);
+  };
+  return (
+    <>
+      <Show when={show()}>
+        <Modal />
+      </Show>
+      <div style={{ position: 'fixed', bottom: '20px', left: '20px' }}>
+        <button
+          style={{ 'border-radius': '50%', width: '50px', height: '50px' }}
+          onclick={showModal}
+        >
+          &#127925;
+        </button>
+      </div>
+    </>
+  );
+};
+const solidContainer = document.createElement('div');
+document.body.appendChild(solidContainer);
+console.log(stylesheet);
+render(() => <App />, solidContainer);

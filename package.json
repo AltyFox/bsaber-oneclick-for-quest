@@ -23,6 +23,7 @@
     "@babel/runtime": "^7.22.10",
     "@yume-chan/adb-credential-web": "^0.0.21",
     "@yume-chan/adb-daemon-webusb": "^0.0.21",
+    "solid-js": "^1.7.11",
     "terser": "^5.24.0",
     "toastify-js": "^1.12.0"
   },
