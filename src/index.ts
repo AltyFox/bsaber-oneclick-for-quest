@@ -33,9 +33,13 @@ const completeCSS = 'green';
 
 let globalPlaylists = [];
 
-setInterval(() => {
-  console.log('globalPlaylists:', globalPlaylists);
-}, 1000);
+const debug = false;
+
+function debugLog(...args: unknown[]) {
+  if (debug) {
+    console.log(...args);
+  }
+}
 
 // Define the QuestAdbHandler class
 class QuestAdbHandler {
@@ -103,7 +107,7 @@ class QuestAdbHandler {
       '/sdcard/ModData/com.beatgames.beatsaber/Mods/PlaylistManager/Playlists/',
     );
     for (const entry of await entries) {
-      console.log(entry.name);
+      debugLog(entry.name);
       const content = (await this.getSync()).read(
         '/sdcard/ModData/com.beatgames.beatsaber/Mods/PlaylistManager/Playlists/' +
           entry.name,
@@ -141,7 +145,13 @@ class QuestAdbHandler {
     if (!transfer) return;
 
     // Extract the blob, transfer notification, zip path, and original name from the transfer object
-    const { blob, zipPath, originalName, bsr, playlistCount = '' } = transfer;
+    const {
+      blob,
+      zipPath,
+      originalName,
+      zipName,
+      playlistCount = '',
+    } = transfer;
 
     // Convert the blob to a ReadableStream and write it to the device
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -155,7 +165,7 @@ class QuestAdbHandler {
       });
       (await self.getSync())
         .write({
-          filename: '/sdcard/' + bsr + '.zip',
+          filename: '/sdcard/' + zipName + '.zip',
           file: file,
         })
         .then(async () => {
@@ -166,27 +176,27 @@ class QuestAdbHandler {
             "mkdir -p $(dirname '" +
               zipPath +
               "') 2>/dev/null && unzip -o /sdcard/" +
-              bsr +
+              zipName +
               ".zip -d '" +
               zipPath +
               "' && unlink /sdcard/" +
-              bsr +
+              zipName +
               '.zip',
           );
 
           await extractProc.stdout.pipeThrough(new DecodeUtf8Stream()).pipeTo(
             new WritableStream<string>({
               write(chunk) {
-                console.log(chunk);
+                debugLog(chunk);
               },
             }),
           );
 
           // Set a timeout to reset the active transfer flag and process the queue after a delay
           setTimeout(() => {
-            this.ActiveTransfer = false;
+            self.ActiveTransfer = false;
             self.ProcessQueue();
-          }, 0);
+          }, 200);
 
           Toastify({
             text:
@@ -300,7 +310,7 @@ class QuestAdbHandler {
 
   // Define a function to install a beatmap
   async installPlaylist(playlistUrl) {
-    console.log(playlistUrl);
+    debugLog(playlistUrl);
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     GM_xmlhttpRequest({
@@ -327,35 +337,32 @@ class QuestAdbHandler {
             file: file,
           });
         });
+
+        let bplistIndex = 0;
+        let bsrArr = [];
         for (let i = 0; i < data.songs.length; i++) {
+          bplistIndex++;
+          debugLog('BPINDEX', bplistIndex, 'length', data.songs.length);
           const song = data.songs[i];
-          console.log(song);
+          debugLog(song);
           const songBsr = song.key;
-          // Do something with the song hash here
-          //
-          await new Promise<void>((resolve) => {
-            const checkDownloadStatus = () => {
-              console.log(self.ActiveDownloadCount);
-              if (self.ActiveDownloadCount < 5) {
-                clearInterval(intervalId);
-                resolve();
-              }
-            };
-            const intervalId = setInterval(checkDownloadStatus, 100);
-          });
+          bsrArr.push(songBsr);
 
           const playlistCount = `${i + 1}/${data.songs.length}`;
+          if (bplistIndex == 49 || bplistIndex == data.songs.length) {
+            bplistIndex = 0;
+            await self.installBeatmaps(bsrArr, playlistCount);
+            await new Promise((resolve) => setTimeout(resolve, 500));
 
-          await new Promise((resolve) => setTimeout(resolve, 100));
-          await this.installBeatmap(songBsr, playlistCount);
+            bsrArr = [];
+          }
         }
       },
     });
   }
-  async installBeatmap(bsr, playlistCount = '') {
+  async installBeatmaps(bsr, playlistCount = '') {
     // Define the URL to request
-    const url = 'https://api.beatsaver.com/maps/id/' + bsr;
-    console.log(url);
+    const url = 'https://api.beatsaver.com/maps/ids/' + bsr.join(',');
 
     // Send a GET request to the URL and extract the download URL and original name from the response
     GM_xmlhttpRequest({
@@ -365,79 +372,104 @@ class QuestAdbHandler {
 
       onload: async (response) => {
         const data = response.response;
-        const songHash = data.versions[0].hash.toUpperCase();
-        const installedSongs = await this.getInstalledSongs();
+        debugLog('response', data);
+        for (const songKey in data) {
+          while (this.ActiveTransfer) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+          const thisSong = data[songKey];
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          this.ActiveDownloadCount++;
+          debugLog(thisSong);
+          const songId = thisSong.id;
+          debugLog('SongID: ', songId);
+          debugLog('Queue', this.ActiveDownloadCount);
+          const songHash = thisSong.versions[0].hash.toUpperCase();
+          const installedSongs = await this.getInstalledSongs();
 
-        const songAlreadyInstalled = Object.values(installedSongs).some(
-          (song) => song.sha1 === songHash,
-        );
-        const downloadURL = data.versions[0].downloadURL;
-        const originalName = data.name;
-        if (songAlreadyInstalled) {
-          Toastify({
-            text: playlistCount + originalName + ' is already installed!',
-            duration: 1000,
+          const songAlreadyInstalled = Object.values(installedSongs).some(
+            (song) => song.sha1 === songHash,
+          );
+          const downloadURL = thisSong.versions[0].downloadURL;
+          const originalName = thisSong.name;
+
+          if (songAlreadyInstalled) {
+            this.ActiveDownloadCount--;
+            Toastify({
+              text: playlistCount + originalName + ' is already installed!',
+              duration: 1000,
+              newWindow: true,
+              close: false,
+              gravity: 'bottom', // `top` or `bottom`
+              position: 'right', // `left`, `center` or `right`
+              stopOnFocus: false, // Prevents dismissing of toast on hover
+              style: {
+                background: completeCSS,
+              },
+              onClick: function () {}, // Callback after click
+            }).showToast();
+            continue;
+          }
+          if (this.ActiveDownloadCount > 5) {
+            await new Promise<void>((resolve) => {
+              const checkDownloadStatus = () => {
+                debugLog(this.ActiveDownloadCount);
+                if (this.ActiveDownloadCount < 5) {
+                  clearInterval(intervalId);
+                  resolve();
+                }
+              };
+              const intervalId = setInterval(checkDownloadStatus, 500);
+            });
+          }
+          const downloadToast = Toastify({
+            text: playlistCount + ' Downloading ' + originalName,
+            duration: 0,
             newWindow: true,
             close: false,
             gravity: 'bottom', // `top` or `bottom`
             position: 'right', // `left`, `center` or `right`
             stopOnFocus: false, // Prevents dismissing of toast on hover
             style: {
-              background: completeCSS,
+              background: downloadingCSS,
             },
             onClick: function () {}, // Callback after click
-          }).showToast();
-          return;
+          });
+          downloadToast.showToast();
+
+          GM_xmlhttpRequest({
+            method: 'GET',
+            url: downloadURL,
+            responseType: 'blob',
+            onprogress: (event) => {
+              const progress = Math.round((event.loaded / event.total) * 100);
+              downloadToast.toastElement.innerText = `${playlistCount} Downloading ${originalName} ${progress}%`;
+            },
+            onload: (response) => {
+              this.ActiveDownloadCount--;
+              const blob = response.response;
+
+              // Dismiss the downloading notification and display a transfer notification
+              downloadToast.hideToast();
+
+              // Add the beatmap file to the transfer queue and process the queue
+              const zipName = songId;
+              const zipPath =
+                '/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels/' +
+                zipName;
+
+              debugLog('Zip Name: ', zipName, 'Zip path: ', zipPath);
+              this.TransferQueue.push({
+                blob,
+                zipPath,
+                originalName,
+                zipName,
+                playlistCount,
+              });
+              this.ProcessQueue();
+            },
+          });
         }
-        this.ActiveDownloadCount++;
-        console.log(installedSongs);
-        console.log(songHash);
-
-        const downloadToast = Toastify({
-          text: playlistCount + ' Downloading ' + originalName,
-          duration: 0,
-          newWindow: true,
-          close: false,
-          gravity: 'bottom', // `top` or `bottom`
-          position: 'right', // `left`, `center` or `right`
-          stopOnFocus: false, // Prevents dismissing of toast on hover
-          style: {
-            background: downloadingCSS,
-          },
-          onClick: function () {}, // Callback after click
-        });
-        downloadToast.showToast();
-
-        GM_xmlhttpRequest({
-          method: 'GET',
-          url: downloadURL,
-          responseType: 'blob',
-          onprogress: (event) => {
-            const progress = Math.round((event.loaded / event.total) * 100);
-            downloadToast.toastElement.innerText = `${playlistCount} Downloading ${originalName} ${progress}%`;
-          },
-          onload: (response) => {
-            this.ActiveDownloadCount--;
-            const blob = response.response;
-
-            // Dismiss the downloading notification and display a transfer notification
-            downloadToast.hideToast();
-
-            // Add the beatmap file to the transfer queue and process the queue
-            const zipName = url.substring(url.lastIndexOf('/') + 1);
-            const zipPath =
-              '/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels/' +
-              zipName;
-            this.TransferQueue.push({
-              blob,
-              zipPath,
-              originalName,
-              bsr,
-              playlistCount,
-            });
-            this.ProcessQueue();
-          },
-        });
       },
     });
   }
@@ -500,7 +532,7 @@ document.addEventListener('click', async function (event) {
     }
   }
 
-  console.log(targetDest);
+  debugLog(targetDest);
   // If there is no beatsaver or bsplaylist URL, return
   if (!targetDest) {
     return;
@@ -515,11 +547,11 @@ document.addEventListener('click', async function (event) {
     adbHandler = new QuestAdbHandler();
     await adbHandler.init();
   }
-  console.log(targetDest);
+  debugLog(targetDest);
   // Extract the beatmap ID or playlist ID from the beatsaver or bsplaylist URL and install the beatmap or playlist
   if (targetDest.startsWith('beatsaver://')) {
     const bsr = targetDest.replace('beatsaver://', '');
-    adbHandler.installBeatmap(bsr);
+    adbHandler.installBeatmaps([bsr]);
   } else if (targetDest.startsWith('bsplaylist://')) {
     const playlistUrl = targetDest.replace('bsplaylist://playlist/', '');
     adbHandler.installPlaylist(playlistUrl);
