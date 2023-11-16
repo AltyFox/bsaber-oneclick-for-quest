@@ -4,7 +4,7 @@ Userscript for Beat Saber OneClick support for Quest users.
 
 Works via WebUSB using [@yume-chan/adb](https://www.npmjs.com/package/@yume-chan/adb)
 
-Make sure there are no running ADB instances on your computer by running `adb kill-server`.
+Make sure there are no running ADB instances on your computer by running this command from your run dialog (Win+R) `cmd /c "for /f "tokens=*" %a in ('where adb.exe') do %a kill-server"`.
 
 Note, SideQuest, and QuestPatcher spawn ADB instances.  Ensure these are closed.
 
