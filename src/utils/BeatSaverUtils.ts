@@ -1,7 +1,26 @@
 import fetch from './fetch';
 
+interface BeatMap {
+  id: string;
+  name: string;
+  uploader: object;
+  description: string;
+  metadata: object;
+  hash: string;
+  automapper: boolean;
+  stats: object;
+}
+
+interface Playlist {
+  playlistTitle: string;
+  playlistAuthor: string;
+  image: string;
+  customData: object;
+  songs: object;
+}
+
 class BeatSaverUtils {
-  getBeatMaps(ids: string): Promise<object> {
+  getBeatMaps(ids: string): Promise<Record<string, BeatMap>> {
     const chunkSize = 50;
     const chunks: Array<string[]> = [];
 
@@ -15,7 +34,7 @@ class BeatSaverUtils {
     // Make multiple requests and store the promises
     const promises = chunks.map(
       (chunk, index) =>
-        new Promise((resolve) => {
+        new Promise<Record<string, BeatMap>>((resolve) => {
           setTimeout(() => {
             resolve(
               fetch(`https://api.beatsaver.com/maps/ids/${chunk.join(',')}`),
@@ -27,7 +46,7 @@ class BeatSaverUtils {
     // Wait for all promises to resolve
     return Promise.all(promises).then((responses) => {
       // Merge the responses into a single object
-      const mergedResponse: object = {};
+      const mergedResponse: Record<string, BeatMap> = {};
 
       responses.forEach((res) => {
         Object.assign(mergedResponse, JSON.parse(res.response as string));
@@ -37,7 +56,7 @@ class BeatSaverUtils {
     });
   }
 
-  getPlaylist(url: string): Promise<object> {
+  getPlaylist(url: string): Promise<Playlist> {
     return fetch(url).then((response) => JSON.parse(response.response));
   }
 }
