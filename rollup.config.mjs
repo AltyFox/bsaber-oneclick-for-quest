@@ -27,7 +27,8 @@ const rollupConfig = [
         path.resolve('src/meta.js'),
         meta => meta
           .replace('process.env.VERSION', pkg.version)
-          .replace('process.env.AUTHOR', pkg.author),
+          .replace('process.env.AUTHOR', pkg.author)
+          .replace('process.env.DESCRIPTION', pkg.description),
       ),
     ],
     external: [
