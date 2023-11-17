@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Quest OneClick Installer
 // @namespace   Beat Saber Quest OneClick Installer
-// @description Userscript to allow the OneClick button to install to your Quest over ADB right from your browser.
+// @description process.env.DESCRIPTION
 // @match       https://bsaber.com/*
 // @match       https://beatsaver.com/*
 // @grant       GM_addStyle
