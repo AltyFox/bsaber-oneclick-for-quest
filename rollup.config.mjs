@@ -2,7 +2,6 @@ import path from 'path';
 import plaid from '@gera2ld/plaid';
 import userscript from 'rollup-plugin-userscript';
 import pkg from './package.json' assert { type: 'json' };
-import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 const { getRollupPlugins } = plaid;
 const DIST = 'dist';
@@ -15,7 +14,6 @@ const rollupConfig = [
   {
     input: 'src/index.ts',
     plugins: [
-      nodeResolve(),
       ...getRollupPlugins({
         esm: true,
         minimize: false,

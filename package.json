@@ -1,5 +1,5 @@
 {
-  "name": "oneclick-for-quest",
+  "name": "bsaber-oneclick-for-quest",
   "version": "0.0.0",
   "description": "",
   "author": "Alteran",
@@ -15,22 +15,18 @@
     "lint": "eslint --ext .ts,.tsx .",
     "ci": "run-s lint",
     "build:js": "rollup -c",
-    "minify": "powershell (Get-Content .\\src\\meta.js -Raw) + (Terser.cmd .\\dist\\index.user.js --compress --mangle) > .\\dist\\index.min.user.js",
-    "meta": "powershell cp src/meta.js dist/index.meta.js",
-    "build": "cross-env NODE_ENV=production run-s ci clean build:js minify meta"
+    "build": "cross-env NODE_ENV=production run-s ci clean build:js"
   },
   "dependencies": {
     "@babel/runtime": "^7.22.10",
-    "@yume-chan/adb-credential-web": "^0.0.21",
-    "@yume-chan/adb-daemon-webusb": "^0.0.21",
-    "terser": "^5.24.0",
-    "toastify-js": "^1.12.0"
+    "@violentmonkey/dom": "^2.1.5",
+    "@violentmonkey/ui": "^0.7.8",
+    "solid-js": "^1.7.11"
   },
   "devDependencies": {
     "@babel/plugin-transform-react-jsx": "^7.22.5",
     "@gera2ld/plaid": "~2.6.0",
     "@gera2ld/plaid-rollup": "~2.6.0",
-    "@types/toastify-js": "^1.12.3",
     "@unocss/postcss": "^0.55.2",
     "@violentmonkey/types": "^0.1.5",
     "babel-preset-solid": "^1.7.7",
