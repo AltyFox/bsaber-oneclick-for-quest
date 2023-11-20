@@ -15,9 +15,7 @@
     "lint": "eslint --ext .ts,.tsx .",
     "ci": "run-s lint",
     "build:js": "rollup -c",
-    "minify": "powershell (Get-Content .\\src\\meta.js -Raw) + (Terser.cmd .\\dist\\index.user.js --compress --mangle) > .\\dist\\index.min.user.js",
-    "meta": "powershell cp src/meta.js dist/index.meta.js",
-    "build": "cross-env NODE_ENV=production run-s ci clean build:js minify meta"
+    "build": "cross-env NODE_ENV=production run-s ci clean build:js"
   },
   "dependencies": {
     "@babel/runtime": "^7.22.10",
