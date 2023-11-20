@@ -2,6 +2,7 @@ name: Release
 
 on:
   push:
+    branches: [ 'master' ]
     tags: [ 'v*' ]  
 
 jobs:
@@ -25,8 +26,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.repository_id }}
-        release_name: Release ${{ github. }}
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
     - name: Upload Release Asset
