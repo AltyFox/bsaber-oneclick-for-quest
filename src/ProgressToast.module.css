@@ -1,0 +1,38 @@
+.toastContainer {
+    background-color: #523500;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-radius: 0.25rem;
+    max-width: 350px;
+    overflow: hidden;
+    position: relative;
+    color: #FFA500;
+}
+
+.toastProgress {
+    transition: width 0.2s ease; /* Add transition property */
+    /* Your existing styles */
+
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: #b96600;
+    position: absolute;
+}
+
+.toastComplete {
+    background-color: #008a00;
+    color: rgb(0, 255, 0);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-radius: 0.25rem;
+    max-width: 350px;   
+    overflow: hidden;
+    position: relative;
+}

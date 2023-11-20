@@ -2,7 +2,6 @@ import path from 'path';
 import plaid from '@gera2ld/plaid';
 import userscript from 'rollup-plugin-userscript';
 import pkg from './package.json' assert { type: 'json' };
-import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 const { getRollupPlugins } = plaid;
 const DIST = 'dist';
@@ -13,9 +12,8 @@ const bundleOptions = {
 };
 const rollupConfig = [
   {
-    input: 'src/index.ts',
+    input: 'src/index.tsx',
     plugins: [
-      nodeResolve(),
       ...getRollupPlugins({
         esm: true,
         minimize: false,
@@ -29,7 +27,8 @@ const rollupConfig = [
         path.resolve('src/meta.js'),
         meta => meta
           .replace('process.env.VERSION', pkg.version)
-          .replace('process.env.AUTHOR', pkg.author),
+          .replace('process.env.AUTHOR', pkg.author)
+          .replace('process.env.DESCRIPTION', pkg.description),
       ),
     ],
     external: [
