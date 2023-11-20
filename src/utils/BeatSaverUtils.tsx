@@ -101,6 +101,7 @@ class BeatSaverUtils {
           zipName;
         if (typeof GM_getValue(zipName) !== 'undefined') {
           toast.success(map.name + ' already installed');
+          sleep(100);
           return;
         }
         GM_setValue(zipName, hash);
