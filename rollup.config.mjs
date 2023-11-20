@@ -16,7 +16,7 @@ const rollupConfig = [
     plugins: [
       ...getRollupPlugins({
         esm: true,
-        minimize: false,
+        minimize: true,
         postcss: {
           inject: false,
           minimize: true,

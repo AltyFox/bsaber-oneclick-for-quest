@@ -4,8 +4,6 @@
 // @description process.env.DESCRIPTION
 // @match       https://bsaber.com/*
 // @match       https://beatsaver.com/*
-// @grant       GM_addStyle
-// @grant       GM_xmlhttpRequest
 // @version     process.env.VERSION
 // @author      process.env.AUTHOR
 // @require     https://cdn.jsdelivr.net/combine/npm/@violentmonkey/dom@2,npm/@violentmonkey/ui@0.7
