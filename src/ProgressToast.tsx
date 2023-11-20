@@ -41,7 +41,7 @@ export default function progressToast(initialText: string) {
       );
     },
     {
-      duration: 0,
+      duration: 999999,
     },
   );
   return {
