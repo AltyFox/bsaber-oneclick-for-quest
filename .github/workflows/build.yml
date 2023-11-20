@@ -23,5 +23,3 @@ jobs:
       with:
         name: index-user-js
         path: dist/*.js
-    - name: Trigger URL
-      run: curl https://bsquest.xyz/bsaber_oneclick/update_userscript.php

@@ -11,6 +11,7 @@ import {
 } from '@yume-chan/adb';
 import AdbWebCredentialStore from '@yume-chan/adb-credential-web';
 import { Consumable, DecodeUtf8Stream } from '@yume-chan/stream-extra';
+//import debugLog from './debug-log';
 
 class QuestAdbUtils {
   Device: AdbDaemonDevice;
@@ -183,18 +184,16 @@ class QuestAdbUtils {
   }
 
   async runCommand(command: string) {
-    setTimeout(function () {
-      return "Timed out.... let's continue";
-    }, 3000);
     const cmdProc = await (await this.getAdb()).subprocess.spawn(command);
     let output = '';
-    cmdProc.stdout.pipeThrough(new DecodeUtf8Stream()).pipeTo(
+    await cmdProc.stdout.pipeThrough(new DecodeUtf8Stream()).pipeTo(
       new WritableStream<string>({
         write(chunk) {
           output += chunk;
         },
       }),
     );
+    await cmdProc.exit;
     return output;
   }
 

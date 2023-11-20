@@ -6,10 +6,10 @@
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
     border-radius: 0.25rem;
-    max-width: 350px;
     overflow: hidden;
     position: relative;
     color: #FFA500;
+    transition: 'all 230ms cubic-bezier(.21,1.02,.73,1)';
 }
 
 .toastProgress {
@@ -32,7 +32,6 @@
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
     border-radius: 0.25rem;
-    max-width: 350px;   
     overflow: hidden;
     position: relative;
 }

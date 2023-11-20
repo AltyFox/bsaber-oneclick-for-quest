@@ -5,9 +5,10 @@ import toast from 'solid-toast';
 import progressToast from '../ProgressToast';
 import { sleep } from './sleep';
 import pLimit from 'p-limit';
+import * as zip from '@zip.js/zip.js';
 
 const adbUtils = new QuestAdbUtils();
-const limit = pLimit(5);
+const limit = pLimit(3);
 
 interface Playlist {
   playlistTitle: string;
@@ -31,9 +32,10 @@ interface BeatMap {
 
 class BeatSaverUtils {
   isCacheInitialized = false;
-  initialize() {
-    adbUtils.init();
+  async initialize() {
+    await adbUtils.init();
     toast('BeatSaverUtils initialized');
+    this.getInstalledSongs();
   }
 
   async downloadSong(url: string, name: string) {
@@ -50,12 +52,14 @@ class BeatSaverUtils {
           const total = progress.total;
           const percentage = (loaded / total) * 100;
           thisProgress = Math.round(percentage);
-          debugLog(thisProgress);
           progToast.setProgress(thisProgress);
         }
       },
     );
     progToast.setText(`${name} downloaded!  Installing...`);
+    setTimeout(() => {
+      progToast.dismiss();
+    }, 3000);
     return { songData: thisMapData.response, toast: progToast };
   }
 
@@ -87,10 +91,18 @@ class BeatSaverUtils {
     return fetch(url).then((res) => JSON.parse(res.response as string));
   }
 
+  limitString(str: string, limit: number): string {
+    if (str.length <= limit) {
+      return str;
+    }
+    return str.slice(0, limit) + '...';
+  }
+
   async installBeatMaps(ids: object) {
     debugLog(ids);
     for (const mapId in ids) {
       const map = ids[mapId];
+      const mapNameShort = this.limitString(map.name, 30);
       const downloadURL = map.versions[0].downloadURL;
       const hash = map.versions[0].hash.toUpperCase();
 
@@ -99,26 +111,26 @@ class BeatSaverUtils {
         const zipPath =
           '/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels/' +
           zipName;
-        if (typeof GM_getValue(zipName) !== 'undefined') {
-          toast.success(map.name + ' already installed');
-          sleep(100);
+        if (typeof GM_getValue(zipPath) !== 'undefined') {
+          toast.success(mapNameShort + ' already installed');
+          await sleep(300);
           return;
         }
-        GM_setValue(zipName, hash);
-        const songData = await this.downloadSong(downloadURL, map.name);
-        debugLog(`/sdcard/${map.id}.zip`);
-        await adbUtils.writeFile(`/sdcard/${map.id}.zip`, songData.songData);
-        sleep(200);
-        debugLog(
-          `mkdir -p $(dirname '${zipPath}') && unzip -o /sdcard/${zipName}.zip -d '${zipPath}' && sleep 0.5 && unlink /sdcard/${zipName}.zip`,
-        );
-        const cmd = await adbUtils.runCommand(
-          `mkdir -p $(dirname '${zipPath}') && unzip -o /sdcard/${zipName}.zip -d '${zipPath}' && sleep 0.5 && unlink /sdcard/${zipName}.zip`,
-        );
-        debugLog(cmd);
-        debugLog(`Ran for ${zipName}`);
+        GM_setValue(zipPath, hash);
+        const songData = await this.downloadSong(downloadURL, mapNameShort);
+        zip.configure({ useWebWorkers: false });
+        const zipFileReader = new zip.BlobReader(songData.songData);
 
-        songData.toast.setText('Installation done: ' + map.name);
+        const zipReader = new zip.ZipReader(zipFileReader);
+
+        for (const entry of await zipReader.getEntries()) {
+          const blobWriter = new zip.BlobWriter();
+          const blob = await entry.getData(blobWriter);
+          await adbUtils.writeFile(zipPath + '/' + entry.filename, blob);
+        }
+        await zipReader.close();
+
+        songData.toast.setText('Installation done: ' + mapNameShort);
       });
     }
   }
@@ -149,19 +161,29 @@ class BeatSaverUtils {
       ),
     );
     for (const song in songloaderCache) {
-      const cachedSong = GM_getValue(songloaderCache[song].sha1);
+      const cachedSong = GM_getValue(song);
       if (typeof cachedSong === 'undefined')
         GM_setValue(song, songloaderCache[song].sha1);
     }
 
-    const folderList = await (
+    const folders = await (
       await adbUtils.getSync()
     ).readdir(
-      '/sdcard/ModData.com.beatgames.beatsaber/Mods/SongLoader/CustomLevels',
+      '/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels',
     );
-    for (const folder of folderList) {
-      if (typeof GM_getValue(folder.name) === 'undefined') {
-        GM_deleteValue(folder.name);
+    const folderList = [];
+    for (const folder in folders) {
+      debugLog(folder);
+      folderList.push(
+        `/sdcard/ModData/com.beatgames.beatsaber.Mods.SongLoader/CustomLevels/${folders[folder].name}`,
+      );
+    }
+
+    for (const song in localCache) {
+      debugLog(folderList);
+      debugLog(localCache[song], 'vs', folderList[song]);
+      if (typeof folderList[song] === 'undefined') {
+        GM_deleteValue(song);
       }
     }
 
@@ -169,7 +191,7 @@ class BeatSaverUtils {
       songCache.push(localCache[song]);
     }
     this.isCacheInitialized = true;
-    console.log(songCache);
+    debugLog(songCache);
     return songCache;
   }
 }

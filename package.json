@@ -1,6 +1,6 @@
 {
   "name": "bsaber-oneclick-for-quest",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Userscript to allow the OneClick button to install to your Quest over ADB right from your browser.",
   "author": "Alteran",
   "license": "GPL-3.0 license",
@@ -25,7 +25,10 @@
     "@yume-chan/adb-credential-web": "^0.0.21",
     "@yume-chan/adb-daemon-webusb": "^0.0.21",
     "@yume-chan/stream-extra": "^0.0.21",
+    "@zip.js/zip.js": "^2.7.31",
+    "jszip": "^3.10.1",
     "p-limit": "^5.0.0",
+    "rollup-plugin-polyfill-node": "^0.12.0",
     "solid-js": "^1.7.11",
     "solid-toast": "^0.5.0",
     "terser": "^5.24.0"
