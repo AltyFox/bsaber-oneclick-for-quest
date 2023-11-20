@@ -12,7 +12,7 @@ const bundleOptions = {
 };
 const rollupConfig = [
   {
-    input: 'src/index.ts',
+    input: 'src/index.tsx',
     plugins: [
       ...getRollupPlugins({
         esm: true,

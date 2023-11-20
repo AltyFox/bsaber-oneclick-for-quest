@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "description": "Userscript to allow the OneClick button to install to your Quest over ADB right from your browser.",
   "author": "Alteran",
-  "license": "MIT",
+  "license": "GPL-3.0 license",
   "private": true,
   "engines": {
     "node": ">=18"
@@ -15,13 +15,22 @@
     "lint": "eslint --ext .ts,.tsx .",
     "ci": "run-s lint",
     "build:js": "rollup -c",
-    "build": "cross-env NODE_ENV=production run-s ci clean build:js"
+    "minify": "powershell (Get-Content .\\src\\meta.js -Raw) + (Terser.cmd .\\dist\\index.user.js --compress --mangle) > .\\dist\\index.min.user.js",
+    "meta": "powershell cp src/meta.js dist/index.meta.js",
+    "build": "cross-env NODE_ENV=production run-s ci clean build:js minify meta"
   },
   "dependencies": {
     "@babel/runtime": "^7.22.10",
     "@violentmonkey/dom": "^2.1.5",
     "@violentmonkey/ui": "^0.7.8",
-    "solid-js": "^1.7.11"
+    "@yume-chan/adb": "^0.0.21",
+    "@yume-chan/adb-credential-web": "^0.0.21",
+    "@yume-chan/adb-daemon-webusb": "^0.0.21",
+    "@yume-chan/stream-extra": "^0.0.21",
+    "p-limit": "^5.0.0",
+    "solid-js": "^1.7.11",
+    "solid-toast": "^0.5.0",
+    "terser": "^5.24.0"
   },
   "devDependencies": {
     "@babel/plugin-transform-react-jsx": "^7.22.5",
