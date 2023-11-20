@@ -14,7 +14,7 @@ Connect your Quest to your computer.
 
 Requires Tampermonkey, or some other UserScript browser plugin.
 
-https://bsquest.xyz/bsaber_oneclick/index.user.js
+https://github.com/AltyFox/bsaber-oneclick-for-quest/releases/latest/download/index.user.js
 
 This is a userscript initiated from [@violentmonkey/generator-userscript](https://github.com/violentmonkey/generator-userscript).
 
