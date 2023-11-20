@@ -1,6 +1,6 @@
 {
   "name": "bsaber-oneclick-for-quest",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "Userscript to allow the OneClick button to install to your Quest over ADB right from your browser.",
   "author": "Alteran",
   "license": "GPL-3.0 license",

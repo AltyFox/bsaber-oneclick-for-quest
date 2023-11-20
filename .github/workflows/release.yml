@@ -26,8 +26,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        tag_name: release
+        release_name: Release 2.0.7${{ github.ref }}
         draft: false
         prerelease: false
     - name: Upload Release Asset
