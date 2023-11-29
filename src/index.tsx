@@ -3,6 +3,7 @@ import { Component } from 'solid-js';
 import { render } from 'solid-js/web';
 import { Toaster } from 'solid-toast';
 import debugLog from './utils/debug-log';
+import fetch from './utils/fetch';
 import './style.css';
 
 const bsUtils = new BeatSaverUtils();
@@ -41,6 +42,19 @@ function hijackOneclick() {
 
     // If there is no beatsaver or bsplaylist URL, return
     if (!targetDest) {
+      if (
+        event.target instanceof HTMLAnchorElement &&
+        event.target.href &&
+        event.target.target !== '_blank'
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        const newHTML = await fetch(event.target.href, {
+          responseType: 'text/html',
+        }).response;
+        console.log(newHTML);
+        document.body.innerHTML = newHTML;
+      }
       return;
     }
 

@@ -136,7 +136,19 @@ class BeatSaverUtils {
   }
 
   async installPlaylist(url: string) {
+    const fileName = url.substring(url.lastIndexOf('/') + 1);
     const playlist = await this.getPlaylist(url);
+
+    const playlistBlob = new Blob([JSON.stringify(playlist)], {
+      type: 'application/json',
+    });
+
+    await adbUtils.writeFile(
+      '/sdcard/ModData/com.beatgames.beatsaber/Mods/PlaylistManager/Playlists/' +
+        fileName,
+      playlistBlob,
+    );
+
     const keys = playlist.songs.map((song) => song.key);
     const keysString = keys.join(',');
     const beatMaps = await this.getBeatMaps(keysString);
