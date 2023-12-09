@@ -111,11 +111,11 @@ class BeatSaverUtils {
         const zipPath =
           '/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels/' +
           zipName;
-        if (typeof GM_getValue(zipPath) !== 'undefined') {
-          toast.success(mapNameShort + ' already installed');
-          await sleep(300);
-          return;
-        }
+        // if (typeof GM_getValue(zipPath) !== 'undefined') {
+        //   toast.success(mapNameShort + ' already installed');
+        //   await sleep(300);
+        //   return;
+        // }
         GM_setValue(zipPath, hash);
         const songData = await this.downloadSong(downloadURL, mapNameShort);
         zip.configure({ useWebWorkers: false });
