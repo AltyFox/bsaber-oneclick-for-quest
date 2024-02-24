@@ -6,7 +6,8 @@ Works via WebUSB using [@yume-chan/adb](https://www.npmjs.com/package/@yume-chan
 
 Note, SideQuest, and QuestPatcher spawn ADB instances.  Ensure these are closed.
 
-Make sure there are no running ADB instances on your computer by running this command from your run dialog (Win+R) 
+Make sure there are no running ADB instances on your computer by running this command from your run dialog (Win+R)
+
 `taskkill /f /im adb*`.
 
 No need to run this command if you haven't used ADB since you've logged into your computer.
