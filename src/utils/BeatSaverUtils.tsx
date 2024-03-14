@@ -147,18 +147,11 @@ class BeatSaverUtils {
       type: 'application/json',
     });
 
-    try {
-      await adbUtils.writeFile(
-        '/sdcard/ModData/com.beatgames.beatsaber/Mods/PlaylistManager/Playlists/' +
-          fileName,
-        playlistBlob,
-      );
-    } catch {
-      toast.error(
-        "Oh no!  You did not allow the ADB prompt inside your headset.   Please put on your headset and 'Always Allow'.  Then please refresh this page and try again",
-        { duration: 10000000 },
-      );
-    }
+    await adbUtils.writeFile(
+      '/sdcard/ModData/com.beatgames.beatsaber/Mods/PlaylistManager/Playlists/' +
+        fileName,
+      playlistBlob,
+    );
 
     const keys = playlist.songs.map((song) => song.key);
     const keysString = keys.join(',');
