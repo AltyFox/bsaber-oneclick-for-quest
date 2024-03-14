@@ -11,6 +11,7 @@ import {
 } from '@yume-chan/adb';
 import AdbWebCredentialStore from '@yume-chan/adb-credential-web';
 import { Consumable, DecodeUtf8Stream } from '@yume-chan/stream-extra';
+import toast from 'solid-toast';
 //import debugLog from './debug-log';
 
 class QuestAdbUtils {
@@ -32,6 +33,26 @@ class QuestAdbUtils {
     this.Manager = null;
   }
 
+  popupError() {
+    toast.error(
+      `An ADB instance on your computer is currently running, or you did not allow the debugging prompt inside your headset.
+      Close SideQuest and QuestPatcher before continuing, then run 
+      "taskkill /f /im adb.exe"
+      from the Run dialog box.
+      (Win+R on your keyboard)
+      
+      If you're on Linux or macOS, run 
+      "killall adb*"
+      from your terminal
+      Once that's done, please refresh the page and try again.
+      Ensure that you "Always Allow" the prompt inside your headset after clicking "Connect" on the left side.
+      `,
+      {
+        duration: 10000000,
+      },
+    );
+  }
+
   async getManager() {
     if (!this.Manager) {
       this.Manager = AdbDaemonWebUsbDeviceManager.BROWSER;
@@ -47,6 +68,7 @@ class QuestAdbUtils {
     if (!this.Device) {
       this.Device = await (await this.getManager()).requestDevice();
     }
+
     return this.Device;
   }
 
@@ -101,12 +123,16 @@ class QuestAdbUtils {
 
   // Define a function to initialize the class
   async init() {
-    this.Device = await this.getDevice();
-    this.Connection = await this.getConnection();
-    this.CredentialStore = await this.getCredentialStore();
-    this.Adb = await this.getAdb();
-    this.Sync = await this.getSync();
-    this.Manager = await this.getManager(); // Await the getManager() method call
+    try {
+      this.Device = await this.getDevice();
+      this.Connection = await this.getConnection();
+      this.CredentialStore = await this.getCredentialStore();
+      this.Adb = await this.getAdb();
+      this.Sync = await this.getSync();
+      this.Manager = await this.getManager(); // Await the getManager() method call
+    } catch {
+      this.popupError();
+    }
     setInterval(async () => {
       if ((await this.getDevices()).length == 0) {
         this.Device = null;

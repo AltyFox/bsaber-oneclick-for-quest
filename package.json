@@ -1,6 +1,6 @@
 {
   "name": "bsaber-oneclick-for-quest",
-  "version": "2.0.14",
+  "version": "2.0.15",
   "description": "Userscript to allow the OneClick button to install to your Quest over ADB right from your browser.",
   "author": "Alteran",
   "license": "GPL-3.0 license",
@@ -13,9 +13,10 @@
     "dev": "rollup -wc",
     "clean": "del-cli dist",
     "lint": "eslint --ext .ts,.tsx .",
+    "fix": "eslint --fix --ext .ts,.tsx .",
     "ci": "run-s lint",
     "build:js": "rollup -c",
-    "build": "cross-env NODE_ENV=production run-s ci clean build:js"
+    "build": "cross-env NODE_ENV=production run-s fix ci clean build:js"
   },
   "dependencies": {
     "@babel/runtime": "^7.22.10",

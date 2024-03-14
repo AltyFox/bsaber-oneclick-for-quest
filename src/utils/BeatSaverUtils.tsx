@@ -33,8 +33,11 @@ interface BeatMap {
 class BeatSaverUtils {
   isCacheInitialized = false;
   async initialize() {
+    toast(
+      'If this is your first time running, please allow the debugging prompt inside your headset after clicking "Connect" on the left side',
+    );
     await adbUtils.init();
-    toast('BeatSaverUtils initialized');
+
     this.getInstalledSongs();
   }
 
@@ -126,6 +129,7 @@ class BeatSaverUtils {
         for (const entry of await zipReader.getEntries()) {
           const blobWriter = new zip.BlobWriter();
           const blob = await entry.getData(blobWriter);
+
           await adbUtils.writeFile(zipPath + '/' + entry.filename, blob);
         }
         await zipReader.close();
@@ -143,11 +147,18 @@ class BeatSaverUtils {
       type: 'application/json',
     });
 
-    await adbUtils.writeFile(
-      '/sdcard/ModData/com.beatgames.beatsaber/Mods/PlaylistManager/Playlists/' +
-        fileName,
-      playlistBlob,
-    );
+    try {
+      await adbUtils.writeFile(
+        '/sdcard/ModData/com.beatgames.beatsaber/Mods/PlaylistManager/Playlists/' +
+          fileName,
+        playlistBlob,
+      );
+    } catch {
+      toast.error(
+        "Oh no!  You did not allow the ADB prompt inside your headset.   Please put on your headset and 'Always Allow'.  Then please refresh this page and try again",
+        { duration: 10000000 },
+      );
+    }
 
     const keys = playlist.songs.map((song) => song.key);
     const keysString = keys.join(',');
