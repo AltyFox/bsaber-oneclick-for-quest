@@ -1,8 +1,11 @@
 # BSaber OneClick for Quest
 
-Userscript for Beat Saber OneClick support for Quest users.
+Userscript for Beat Saber OneClick support on [BeatSaver](https://beatsaver.com).
+This Script lets you install songs and playlists onto your Quest 1, 2, 3 and Pro with BeatSavers Oneclick feature.
 
 Works via WebUSB using [@yume-chan/adb](https://www.npmjs.com/package/@yume-chan/adb)
+
+## Installing
 
 Note, SideQuest, and QuestPatcher spawn ADB instances.  Ensure these are closed.
 
