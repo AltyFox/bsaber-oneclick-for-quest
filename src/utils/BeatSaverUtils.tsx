@@ -53,10 +53,10 @@ class BeatSaverUtils {
     });
   }
 
-  async downloadSong(url: string, name: string) {
+  async downloadSong(url: string, name: string, plText: string = "") {
     let thisProgress = 0;
     debugLog('I AM DOWNLOADIG');
-    const progToast = progressToast(`Downloading ${name}`);
+    const progToast = progressToast(`${plText}Downloading ${name}`);
 
     const thisMapData = await fetch(
       url,
@@ -71,7 +71,7 @@ class BeatSaverUtils {
         }
       },
     );
-    progToast.setText(`${name} downloaded!  Installing...`);
+    progToast.setText(`${plText}${name} installing...`);
     setTimeout(() => {
       progToast.dismiss();
     }, 3000);
@@ -114,6 +114,9 @@ class BeatSaverUtils {
   }
 
   async installBeatMaps(ids: object) {
+    const numProperties = Object.keys(ids).length;
+    let iterCount = 0;
+
     for (const mapId in ids) {
       const map = ids[mapId];
       const mapNameShort = this.limitString(map.name, 30);
@@ -121,17 +124,22 @@ class BeatSaverUtils {
       const hash = map.versions[0].hash.toUpperCase();
 
       limit(async () => {
+        iterCount = iterCount + 1;
+        let plText = "";
+        if (numProperties > 1) {
+          plText =  `${iterCount} / ${numProperties} `;
+        }
         const zipName = map.id;
         const zipPath =
           '/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels/' +
           zipName;
         if (typeof GM_getValue(hash) !== 'undefined') {
-          toast.success(mapNameShort + ' already installed');
+          toast.success(`${plText}${mapNameShort} already installed`);
           await sleep(500);
           return;
         }
         GM_setValue(hash, zipPath);
-        const songData = await this.downloadSong(downloadURL, mapNameShort);
+        const songData = await this.downloadSong(downloadURL, mapNameShort, plText);
         zip.configure({ useWebWorkers: false });
         const zipFileReader = new zip.BlobReader(songData.songData);
 
@@ -145,7 +153,7 @@ class BeatSaverUtils {
         }
         await zipReader.close();
 
-        songData.toast.setText('Installation done: ' + mapNameShort);
+        songData.toast.setText(`${plText}${mapNameShort} installed!`);
       });
     }
   }
