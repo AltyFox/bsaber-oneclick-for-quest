@@ -32,13 +32,25 @@ interface BeatMap {
 
 class BeatSaverUtils {
   isCacheInitialized = false;
+
+  async sha1(str) {
+    const enc = new TextEncoder();
+    const hash = await crypto.subtle.digest('SHA-1', enc.encode(str));
+    return Array.from(new Uint8Array(hash))
+      .map((v) => v.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
   async initialize() {
     toast(
       'If this is your first time running, please allow the debugging prompt inside your headset after clicking "Connect" on the left side',
     );
     await adbUtils.init();
-
-    this.getInstalledSongs();
+    toast.promise(this.getInstalledSongs(), {
+      loading: 'Loading installed songs... Please wait before doing anything!',
+      success: 'Installed songs loaded!!  You may continue.',
+      error: 'Something went wrong',
+    });
   }
 
   async downloadSong(url: string, name: string) {
@@ -102,7 +114,6 @@ class BeatSaverUtils {
   }
 
   async installBeatMaps(ids: object) {
-    debugLog(ids);
     for (const mapId in ids) {
       const map = ids[mapId];
       const mapNameShort = this.limitString(map.name, 30);
@@ -114,12 +125,12 @@ class BeatSaverUtils {
         const zipPath =
           '/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels/' +
           zipName;
-        // if (typeof GM_getValue(zipPath) !== 'undefined') {
-        //   toast.success(mapNameShort + ' already installed');
-        //   await sleep(300);
-        //   return;
-        // }
-        GM_setValue(zipPath, hash);
+        if (typeof GM_getValue(hash) !== 'undefined') {
+          toast.success(mapNameShort + ' already installed');
+          await sleep(500);
+          return;
+        }
+        GM_setValue(hash, zipPath);
         const songData = await this.downloadSong(downloadURL, mapNameShort);
         zip.configure({ useWebWorkers: false });
         const zipFileReader = new zip.BlobReader(songData.songData);
@@ -159,11 +170,49 @@ class BeatSaverUtils {
     this.installBeatMaps(beatMaps);
   }
 
-  async deleteSong() {}
+  async getSongHash(path: string) {
+    const files = await (await adbUtils.getSync()).readdir(path);
+    const fileList = [];
+    for (const file of files) {
+      fileList.push(path + '/' + file.name);
+    }
+    let infoContents: string;
+    const diffFilenames = [];
+
+    // Step 1: Read the contents of the "info.dat" file
+    for (const file of fileList) {
+      if (file.toLowerCase().endsWith('/info.dat')) {
+        infoContents = await adbUtils.readFile(file);
+        debugLog(file);
+        break;
+      }
+    }
+
+    // Step 2: Extract filenames of "diff.dat" files
+    if (infoContents) {
+      const infoData = JSON.parse(infoContents);
+      if (infoData._difficultyBeatmapSets) {
+        for (const set of infoData._difficultyBeatmapSets) {
+          for (const diff of set._difficultyBeatmaps) {
+            diffFilenames.push(diff._beatmapFilename);
+          }
+        }
+      }
+    }
+
+    // Step 3 and 4: Read and concatenate contents of "diff.dat" files
+    let combinedContents = infoContents;
+    for (const diffFile of diffFilenames) {
+      const diffContent = await adbUtils.readFile(path + '/' + diffFile);
+      combinedContents += diffContent;
+    }
+
+    return (await this.sha1(combinedContents)).toUpperCase();
+  }
 
   async getInstalledSongs() {
     const songCache = [];
-    const localCache = GM_listValues();
+    let localCache = GM_listValues();
     if (this.isCacheInitialized) {
       for (const song in localCache) {
         songCache.push(localCache[song]);
@@ -177,9 +226,9 @@ class BeatSaverUtils {
       ),
     );
     for (const song in songloaderCache) {
-      const cachedSong = GM_getValue(song);
+      const cachedSong = GM_getValue(songloaderCache[song].sha1);
       if (typeof cachedSong === 'undefined')
-        GM_setValue(song, songloaderCache[song].sha1);
+        GM_setValue(songloaderCache[song].sha1, song);
     }
 
     const folders = await (
@@ -187,24 +236,51 @@ class BeatSaverUtils {
     ).readdir(
       '/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels',
     );
-    const folderList = [];
+    const hashList = [];
     for (const folder in folders) {
-      debugLog(folder);
-      folderList.push(
-        `/sdcard/ModData/com.beatgames.beatsaber.Mods.SongLoader/CustomLevels/${folders[folder].name}`,
-      );
-    }
-
-    for (const song in localCache) {
-      debugLog(folderList);
-      debugLog(localCache[song], 'vs', folderList[song]);
-      if (typeof folderList[song] === 'undefined') {
-        GM_deleteValue(song);
+      const songPath = `/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels/${folders[folder].name}`;
+      if (songloaderCache[songPath]) {
+        hashList.push(songloaderCache[songPath].sha1);
+      } else {
+        let isCached = false;
+        for (const index in localCache) {
+          const localValue = GM_getValue(localCache[index]);
+          if (localValue == songPath) {
+            debugLog('Local cache found of missing SongLoader cache: ', index);
+            isCached = true;
+            hashList.push(index);
+          }
+        }
+        if (!isCached) {
+          const newSongHash = await this.getSongHash(songPath);
+          GM_setValue(newSongHash, songPath);
+          hashList.push(newSongHash);
+        }
       }
     }
 
-    for (const song in localCache) {
-      songCache.push(localCache[song]);
+    localCache = GM_listValues();
+    for (const index in localCache) {
+      const thisHash = localCache[index];
+      const thisPath = GM_getValue(thisHash);
+      let found = false;
+      for (const folder in folders) {
+        const songPath = `/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels/${folders[folder].name}`;
+        if (thisPath == songPath) {
+          found = true;
+          debugLog('FOUND');
+        }
+      }
+
+      if (!found) {
+        debugLog(thisPath);
+        debugLog('Local cache found that was not on headset!  Removing');
+        GM_deleteValue(thisHash);
+      }
+    }
+    localCache = GM_listValues();
+    for (const hash in localCache) {
+      songCache.push(localCache[hash]);
     }
     this.isCacheInitialized = true;
     debugLog(songCache);
