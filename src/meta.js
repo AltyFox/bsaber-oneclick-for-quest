@@ -6,10 +6,10 @@
 // @match       https://beatsaver.com/*
 // @version     process.env.VERSION
 // @author      process.env.AUTHOR
-// @require     https://cdn.jsdelivr.net/combine/npm/@violentmonkey/dom@2,npm/@violentmonkey/ui@0.7
 // @require     https://cdn.jsdelivr.net/npm/@violentmonkey/dom@2/dist/solid.js
 // @downloadURL https://github.com/AltyFox/bsaber-oneclick-for-quest/releases/latest/download/index.user.js
 // @updateURL   https://github.com/AltyFox/bsaber-oneclick-for-quest/releases/latest/download/index.user.js
+
 // ==/UserScript==
 
 /**

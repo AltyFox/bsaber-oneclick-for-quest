@@ -10,6 +10,16 @@ import * as zip from '@zip.js/zip.js';
 const adbUtils = new QuestAdbUtils();
 const limit = pLimit(3);
 
+const songPath = [
+  '/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels/',
+  '/sdcard/ModData/com.beatgames.beatsaber/Mods/SongCore/CustomLevels/',
+];
+
+const playlistJson = [
+  '/sdcard/ModData/com.beatgames.beatsaber/Configs/SongLoader.json',
+  '/sdcard/ModData/com.beatgames.beatsaber/Mods/SongCore/CachedSongData.json',
+];
+
 interface Playlist {
   playlistTitle: string;
   playlistAuthor: string;
@@ -32,6 +42,24 @@ interface BeatMap {
 
 class BeatSaverUtils {
   isCacheInitialized = false;
+  globalSongPath = null;
+  globalPlaylistJsonPath = null;
+
+  getInstalledVersion = async () => {
+    const dumpsysCommand = 'dumpsys package com.beatgames.beatsaber';
+    const dumpsysResult = await adbUtils.runCommand(dumpsysCommand);
+    const versionRegex = /versionName=(\S+)/;
+    const match = dumpsysResult.match(versionRegex);
+    if (match) {
+      const installedVersion = match[1];
+      console.log(installedVersion);
+      return installedVersion;
+      // Do something with the installed version
+    } else {
+      console.log('Unable to retrieve installed version');
+      // Handle case when version information is not available
+    }
+  };
 
   async sha1(str) {
     const enc = new TextEncoder();
@@ -46,6 +74,7 @@ class BeatSaverUtils {
       'If this is your first time running, please allow the debugging prompt inside your headset after clicking "Connect" on the left side',
     );
     await adbUtils.init();
+    await this.getInstalledSongs();
     toast.promise(this.getInstalledSongs(), {
       loading: 'Loading installed songs... Please wait before doing anything!',
       success: 'Installed songs loaded!!  You may continue.',
@@ -53,7 +82,7 @@ class BeatSaverUtils {
     });
   }
 
-  async downloadSong(url: string, name: string, plText: string = "") {
+  async downloadSong(url: string, name: string, plText: string = '') {
     let thisProgress = 0;
     debugLog('I AM DOWNLOADIG');
     const progToast = progressToast(`${plText}Downloading ${name}`);
@@ -125,21 +154,23 @@ class BeatSaverUtils {
 
       limit(async () => {
         iterCount = iterCount + 1;
-        let plText = "";
+        let plText = '';
         if (numProperties > 1) {
-          plText =  `${iterCount} / ${numProperties} `;
+          plText = `${iterCount} / ${numProperties} `;
         }
         const zipName = map.id;
-        const zipPath =
-          '/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels/' +
-          zipName;
+        const zipPath = (await this.getSongPath()) + zipName;
         if (typeof GM_getValue(hash) !== 'undefined') {
           toast.success(`${plText}${mapNameShort} already installed`);
           await sleep(500);
           return;
         }
         GM_setValue(hash, zipPath);
-        const songData = await this.downloadSong(downloadURL, mapNameShort, plText);
+        const songData = await this.downloadSong(
+          downloadURL,
+          mapNameShort,
+          plText,
+        );
         zip.configure({ useWebWorkers: false });
         const zipFileReader = new zip.BlobReader(songData.songData);
 
@@ -218,6 +249,34 @@ class BeatSaverUtils {
     return (await this.sha1(combinedContents)).toUpperCase();
   }
 
+  async getPlaylistJsonPath() {
+    if (this.globalPlaylistJsonPath) {
+      return this.globalPlaylistJsonPath;
+    }
+    const installedVersion = await this.getInstalledVersion();
+    if (installedVersion && parseFloat(installedVersion) >= 1.35) {
+      this.globalPlaylistJsonPath = playlistJson[1];
+    } else {
+      this.globalPlaylistJsonPath = playlistJson[0];
+    }
+    return this.globalPlaylistJsonPath;
+  }
+
+  async getSongPath() {
+    if (this.globalSongPath) {
+      console.log(this.globalSongPath);
+      return this.globalSongPath;
+    }
+    const installedVersion = await this.getInstalledVersion();
+    if (installedVersion && parseFloat(installedVersion) >= 1.35) {
+      this.globalSongPath = songPath[1];
+    } else {
+      this.globalSongPath = songPath[0];
+    }
+    console.log(this.globalSongPath);
+    return this.globalSongPath;
+  }
+
   async getInstalledSongs() {
     const songCache = [];
     let localCache = GM_listValues();
@@ -229,24 +288,20 @@ class BeatSaverUtils {
     }
 
     const songloaderCache = JSON.parse(
-      await adbUtils.readFile(
-        '/sdcard/ModData/com.beatgames.beatsaber/Configs/SongLoader.json',
-      ),
+      await adbUtils.readFile(await this.getPlaylistJsonPath()),
     );
     for (const song in songloaderCache) {
       const cachedSong = GM_getValue(songloaderCache[song].sha1);
       if (typeof cachedSong === 'undefined')
         GM_setValue(songloaderCache[song].sha1, song);
     }
-
+    console.log(await this.getSongPath());
     const folders = await (
       await adbUtils.getSync()
-    ).readdir(
-      '/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels',
-    );
+    ).readdir(await this.getSongPath());
     const hashList = [];
     for (const folder in folders) {
-      const songPath = `/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels/${folders[folder].name}`;
+      const songPath = `${await this.getSongPath()}${folders[folder].name}`;
       if (songloaderCache[songPath]) {
         hashList.push(songloaderCache[songPath].sha1);
       } else {
@@ -254,7 +309,7 @@ class BeatSaverUtils {
         for (const index in localCache) {
           const localValue = GM_getValue(localCache[index]);
           if (localValue == songPath) {
-            debugLog('Local cache found of missing SongLoader cache: ', index);
+            debugLog('Local cache found of missing Quest cache: ', index);
             isCached = true;
             hashList.push(index);
           }
@@ -273,7 +328,7 @@ class BeatSaverUtils {
       const thisPath = GM_getValue(thisHash);
       let found = false;
       for (const folder in folders) {
-        const songPath = `/sdcard/ModData/com.beatgames.beatsaber/Mods/SongLoader/CustomLevels/${folders[folder].name}`;
+        const songPath = `${await this.getSongPath()}${folders[folder].name}`;
         if (thisPath == songPath) {
           found = true;
           debugLog('FOUND');
