@@ -3,7 +3,9 @@
 // @namespace   Beat Saber Quest OneClick Installer
 // @description process.env.DESCRIPTION
 // @match       https://bsaber.com/*
+// @match       https://www.bsaber.com/*
 // @match       https://beatsaver.com/*
+// @match       https://www.beatsaver.com/*
 // @version     process.env.VERSION
 // @author      process.env.AUTHOR
 // @require     https://cdn.jsdelivr.net/npm/@violentmonkey/dom@2/dist/solid.js
