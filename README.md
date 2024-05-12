@@ -19,7 +19,9 @@ Connect your Quest to your computer.
 
 Requires Tampermonkey, or some other UserScript browser plugin.
 
-https://github.com/AltyFox/bsaber-oneclick-for-quest/releases/latest/download/index.user.js
+Once Tampermonkey or an equivalent UserScript plugin is installed, [please click here to install the userscript](https://github.com/AltyFox/bsaber-oneclick-for-quest/releases/latest/download/index.user.js)
+
+Once the UserScript is installed, visit http://beatsaver.com and click "Quest OneClick" in the titlebar.
 
 This is a userscript initiated from [@violentmonkey/generator-userscript](https://github.com/violentmonkey/generator-userscript).
 
