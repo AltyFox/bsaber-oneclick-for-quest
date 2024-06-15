@@ -1,5 +1,4 @@
 # BSaber OneClick for Quest
-
 Userscript for Beat Saber OneClick support on [BeatSaver](https://beatsaver.com).
 This Script lets you install songs and playlists onto your Quest 1, 2, 3 and Pro with BeatSavers Oneclick feature.
 
@@ -24,16 +23,3 @@ Once Tampermonkey or an equivalent UserScript plugin is installed, [please click
 Once the UserScript is installed, visit http://beatsaver.com and click "Quest OneClick" in the titlebar.
 
 This is a userscript initiated from [@violentmonkey/generator-userscript](https://github.com/violentmonkey/generator-userscript).
-
-## Development
-
-``` sh
-# Compile and watch
-$ npm run dev
-
-# Build script
-$ npm run build
-
-# Lint
-$ npm run lint
-```
