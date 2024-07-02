@@ -109,11 +109,14 @@ const OneClickInit: Component = () => {
   }
 };
 
-render(
-  () => <OneClickInit />,
-  isBeatSaver
-    ? document.querySelector('ul.navbar-nav.me-auto')
-    : isBeatLeader
-    ? document.querySelector('nav.ssr-page-container')
-    : document.querySelector('#menu-navigation-1')
-);
+document.addEventListener('DOMContentLoaded', () => {
+  render(
+    () => <OneClickInit />,
+    isBeatSaver
+      ? document.querySelector('ul.navbar-nav.me-auto')
+      : isBeatLeader
+      ? document.querySelector('nav.ssr-page-container')
+      : document.querySelector('#menu-navigation-1')
+  );
+});
+
