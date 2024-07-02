@@ -8,6 +8,17 @@ import './style.css';
 const bsUtils = new BeatSaverUtils();
 const website = window.location.hostname;
 const isBeatSaver = website === 'beatsaver.com';
+const isBeatLeader = website === 'beatleader.xyz';
+const rankingLink = document.querySelector('a[aria-label="Ranking"]');
+let beatLeaderLinkClass = null;
+
+if (rankingLink) {
+    // Get the class name of the found element
+    const className = rankingLink.className;
+
+    // Set the class name of the new <a> element
+    beatLeaderLinkClass = className;
+} 
 
 // bsUtils
 //   .getPlaylist('https://api.beatsaver.com/playlists/id/221509/download')
@@ -75,21 +86,34 @@ function connectQuest() {
 }
 
 const OneClickInit: Component = () => {
-  return (
-    <>
-      <Toaster />
-      <li class="nav-item">
-        <a href="#" class="nav-link" onClick={connectQuest}>
+  if (isBeatLeader) {
+    return (
+      <>
+        <Toaster />
+        <a class={beatLeaderLinkClass} onClick={connectQuest}>
           &#128279; Quest OneClick
         </a>
-      </li>
-    </>
-  );
+      </>
+    );
+  } else {
+    return (
+      <>
+        <Toaster />
+        <li class="nav-item">
+          <a href="#" class="nav-link" onClick={connectQuest}>
+            &#128279; Quest OneClick
+          </a>
+        </li>
+      </>
+    );
+  }
 };
 
 render(
   () => <OneClickInit />,
   isBeatSaver
     ? document.querySelector('ul.navbar-nav.me-auto')
-    : document.querySelector('#menu-navigation-1'),
+    : isBeatLeader
+    ? document.querySelector('nav.ssr-page-container')
+    : document.querySelector('#menu-navigation-1')
 );
