@@ -18,6 +18,7 @@ if (rankingLink) {
 
     // Set the class name of the new <a> element
     beatLeaderLinkClass = className;
+    console.log(beatLeaderLinkClass);
 } 
 
 // bsUtils
@@ -109,7 +110,7 @@ const OneClickInit: Component = () => {
   }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+
   render(
     () => <OneClickInit />,
     isBeatSaver
@@ -118,5 +119,4 @@ document.addEventListener('DOMContentLoaded', () => {
       ? document.querySelector('nav.ssr-page-container')
       : document.querySelector('#menu-navigation-1')
   );
-});
 
