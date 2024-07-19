@@ -3,33 +3,11 @@ import { Component } from 'solid-js';
 import { render } from 'solid-js/web';
 import { Toaster } from 'solid-toast';
 import debugLog from './utils/debug-log';
+import styles, { stylesheet } from './style.module.css';
+GM_addStyle(stylesheet);
 import './style.css';
 
 const bsUtils = new BeatSaverUtils();
-const website = window.location.hostname;
-const isBeatSaver = website === 'beatsaver.com';
-const isBeatLeader = website === 'beatleader.xyz';
-const rankingLink = document.querySelector('a[aria-label="Ranking"]');
-let beatLeaderLinkClass = null;
-
-if (rankingLink) {
-    // Get the class name of the found element
-    const className = rankingLink.className;
-
-    // Set the class name of the new <a> element
-    beatLeaderLinkClass = className;
-    console.log(beatLeaderLinkClass);
-} 
-
-// bsUtils
-//   .getPlaylist('https://api.beatsaver.com/playlists/id/221509/download')
-//   .then((data) => {
-//     const keys = data.songs.map((song) => song.key);
-//     const keysString = keys.join(',');
-//     bsUtils.getBeatMaps(keysString).then((maps) => {
-//       debugLog(Object.entries(maps));
-//     });
-//   });
 
 function hijackOneclick() {
   document.addEventListener('click', async function (event) {
@@ -87,36 +65,14 @@ function connectQuest() {
 }
 
 const OneClickInit: Component = () => {
-  if (isBeatLeader) {
-    return (
-      <>
-        <Toaster />
-        <a class={beatLeaderLinkClass} onClick={connectQuest}>
-          &#128279; Quest OneClick
-        </a>
-      </>
-    );
-  } else {
-    return (
-      <>
-        <Toaster />
-        <li class="nav-item">
-          <a href="#" class="nav-link" onClick={connectQuest}>
-            &#128279; Quest OneClick
-          </a>
-        </li>
-      </>
-    );
-  }
+  return (
+    <>
+      <Toaster />
+      <button class={styles.glowButton} role="button" onClick={connectQuest}>
+        &#128279; Click here to enable Quest OneClick
+      </button>
+    </>
+  );
 };
 
-
-  render(
-    () => <OneClickInit />,
-    isBeatSaver
-      ? document.querySelector('ul.navbar-nav.me-auto')
-      : isBeatLeader
-      ? document.querySelector('nav.ssr-page-container')
-      : document.querySelector('#menu-navigation-1')
-  );
-
+render(() => <OneClickInit />, document.body);

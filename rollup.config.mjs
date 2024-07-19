@@ -18,7 +18,7 @@ const rollupConfig = [
         esm: true,
         minimize: false,
         postcss: {
-          inject: false,
+          inject: true,
           minimize: true,
         },
         extensions: ['.ts', '.tsx', '.mjs', '.js', '.jsx'],

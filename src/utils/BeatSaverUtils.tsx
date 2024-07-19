@@ -91,6 +91,7 @@ class BeatSaverUtils {
       url,
       { responseType: 'blob' },
       (progress) => {
+        debugLog(progress);
         if (progress.lengthComputable) {
           const loaded = progress.loaded;
           const total = progress.total;
