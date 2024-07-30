@@ -62,13 +62,23 @@ function hijackOneclick() {
 function connectQuest() {
   bsUtils.initialize();
   hijackOneclick();
+
+  const button = document.getElementById('oneclick_enable');
+  if (button) {
+    button.classList.add(styles.fadeOut);
+  }
 }
 
 const OneClickInit: Component = () => {
   return (
     <>
       <Toaster />
-      <button class={styles.glowButton} role="button" onClick={connectQuest}>
+      <button
+        id="oneclick_enable"
+        class={styles.glowButton}
+        role="button"
+        onClick={connectQuest}
+      >
         &#128279; Click here to enable Quest OneClick
       </button>
     </>

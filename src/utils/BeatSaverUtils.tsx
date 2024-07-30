@@ -74,7 +74,6 @@ class BeatSaverUtils {
       'If this is your first time running, please allow the debugging prompt inside your headset after clicking "Connect" on the left side',
     );
     await adbUtils.init();
-    await this.getInstalledSongs();
     toast.promise(this.getInstalledSongs(), {
       loading: 'Loading installed songs... Please wait before doing anything!',
       success: 'Installed songs loaded!!  You may continue.',

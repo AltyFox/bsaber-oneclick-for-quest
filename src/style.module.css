@@ -1,3 +1,7 @@
+.fadeOut {
+  opacity: 0;
+  display: none; 
+}
 
 
 .glowButton {
