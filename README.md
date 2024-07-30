@@ -16,9 +16,9 @@ No need to run this command if you haven't used ADB since you've logged into you
 
 Connect your Quest to your computer.
 
-Requires Tampermonkey, or some other UserScript browser plugin.
+Requires Violentmonkey for best compatibility, or some other UserScript browser plugin. 
 
-Once Tampermonkey or an equivalent UserScript plugin is installed, [please click here to install the userscript](https://github.com/AltyFox/bsaber-oneclick-for-quest/releases/latest/download/index.user.js)
+Once Violentmonkey or an equivalent UserScript plugin is installed, [please click here to install the userscript](https://github.com/AltyFox/bsaber-oneclick-for-quest/releases/latest/download/index.user.js)
 
 Once the UserScript is installed, visit http://beatsaver.com and click "Quest OneClick" in the titlebar.
 

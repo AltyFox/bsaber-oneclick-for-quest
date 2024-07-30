@@ -76,3 +76,47 @@ const OneClickInit: Component = () => {
 };
 
 render(() => <OneClickInit />, document.body);
+
+// Check if the script handler is not Violentmonkey and if the notice has not been dismissed before
+if (
+  GM_info.scriptHandler !== 'Violentmonkey' &&
+  !localStorage.getItem('violentmonkeyNoticeDismissed')
+) {
+  // Create the popup elements
+  const popup = document.createElement('div');
+  popup.id = 'script-notice-popup';
+  popup.style.color = 'black';
+  popup.style.fontWeight = '1.3em';
+  popup.style.position = 'fixed';
+  popup.style.top = '50%';
+  popup.style.left = '50%';
+  popup.style.transform = 'translate(-50%, -50%)';
+  popup.style.backgroundColor = 'white';
+  popup.style.border = '1px solid black';
+  popup.style.padding = '20px';
+  popup.style.zIndex = '10000';
+  popup.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+  popup.style.maxWidth = '80%';
+  popup.style.textAlign = 'center';
+
+  const message = document.createElement('p');
+  message.textContent = `For better compatibility, we recommend using Violentmonkey instead of ${GM_info.scriptHandler} for the OneClick for Quest installer.
+  You will not see this notice again after dismissing it.`;
+  popup.appendChild(message);
+
+  const button = document.createElement('button');
+  button.textContent = 'Dismiss';
+  button.style.marginTop = '10px';
+  button.style.padding = '10px 20px';
+  button.style.backgroundColor = '#007BFF';
+  button.style.color = 'white';
+  button.style.border = 'none';
+  button.style.cursor = 'pointer';
+  button.addEventListener('click', function () {
+    localStorage.setItem('violentmonkeyNoticeDismissed', 'true');
+    document.body.removeChild(popup);
+  });
+
+  popup.appendChild(button);
+  document.body.appendChild(popup);
+}
