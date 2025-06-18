@@ -23,3 +23,4 @@ Once Violentmonkey or an equivalent UserScript plugin is installed, [please clic
 Once the UserScript is installed, visit http://beatsaver.com and click "Quest OneClick" in the titlebar.
 
 This is a userscript initiated from [@violentmonkey/generator-userscript](https://github.com/violentmonkey/generator-userscript).
+ 
