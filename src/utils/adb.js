@@ -7,7 +7,6 @@ import AdmZip from 'adm-zip';
 
 const ADB_URLS = {
     win32: 'https://dl.google.com/android/repository/platform-tools-latest-windows.zip',
-    darwin: 'https://dl.google.com/android/repository/platform-tools-latest-darwin.zip',
     linux: 'https://dl.google.com/android/repository/platform-tools-latest-linux.zip',
 };
 

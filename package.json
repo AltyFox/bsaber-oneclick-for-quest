@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder",
-    "package": "electron-builder --dir",
+    "build": "electron-builder -wl",
+    "package": "electron-builder --dir -wl",
     "format": "prettier --write \"src/**/*.js\""
   },
   "dependencies": {
