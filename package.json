@@ -1,58 +1,43 @@
 {
-  "name": "bsaber-oneclick-for-quest",
-  "version": "2.0.28",
-  "description": "Userscript to allow the OneClick button to install to your Quest over ADB right from your browser.",
-  "author": "Alteran",
-  "license": "GPL-3.0 license",
-  "private": true,
-  "engines": {
-    "node": ">=18"
-  },
+  "name": "electron-adb-checker",
+  "version": "1.0.0",
+  "description": "An Electron app to check for ADB presence, download it if missing, and connect to the user's Quest.",
+  "main": "src/main.ts",
   "scripts": {
-    "prepare": "husky install",
-    "dev": "rollup -wc",
-    "clean": "del-cli dist",
-    "lint": "eslint --ext .ts,.tsx .",
-    "fix": "eslint --fix --ext .ts,.tsx .",
-    "ci": "run-s lint",
-    "build:js": "rollup -c",
-    "build": "cross-env NODE_ENV=production run-s fix ci clean build:js"
+    "start": "electron .",
+    "build": "electron-builder",
+    "package": "electron-builder --dir"
   },
   "dependencies": {
-    "@babel/runtime": "^7.22.10",
-    "@violentmonkey/dom": "^2.1.5",
-    "@violentmonkey/ui": "^0.7.8",
-    "@yume-chan/adb": "^0.0.21",
-    "@yume-chan/adb-credential-web": "^0.0.21",
-    "@yume-chan/adb-daemon-webusb": "^0.0.21",
-    "@yume-chan/stream-extra": "^0.0.21",
-    "@zip.js/zip.js": "^2.7.31",
-    "crypto": "^1.0.1",
-    "js-sha1": "^0.7.0",
-    "jszip": "^3.10.1",
-    "p-limit": "^5.0.0",
-    "rollup-plugin-polyfill-node": "^0.12.0",
-    "solid-js": "^1.7.11",
-    "solid-toast": "^0.5.0",
-    "terser": "^5.24.0"
+    "electron": "^25.0.0",
+    "axios": "^0.27.2",
+    "fs-extra": "^10.0.0"
   },
   "devDependencies": {
-    "@babel/plugin-transform-react-jsx": "^7.22.5",
-    "@gera2ld/plaid": "~2.6.0",
-    "@gera2ld/plaid-rollup": "~2.6.0",
-    "@unocss/postcss": "^0.55.2",
-    "@violentmonkey/types": "^0.1.5",
-    "babel-preset-solid": "^1.7.7",
-    "del-cli": "^5.0.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-prettier": "^5.0.0",
-    "husky": "^8.0.3",
-    "lint-staged": "^14.0.1",
-    "prettier": "^3.0.2",
-    "rollup-plugin-userscript": "^0.2.0",
-    "unocss": "^0.55.2"
+    "typescript": "^4.5.4",
+    "electron-builder": "^23.6.0"
   },
-  "lint-staged": {
-    "*.{ts,tsx}": "eslint --fix"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/electron-adb-checker.git"
+  },
+  "keywords": [
+    "electron",
+    "adb",
+    "quest",
+    "application"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "build": {
+    "appId": "com.yourname.electronadbchecker",
+    "productName": "Electron ADB Checker",
+    "files": [
+      "dist/**/*",
+      "src/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    }
   }
 }

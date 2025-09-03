@@ -1,7 +1,42 @@
-node_modules
+# Node modules
+node_modules/
+
+# Build output
+dist/
+out/
+build/
+
+# Electron packaging
+*.asar
+
+# Logs
 *.log
-/.idea
-/dist
-/.nyc_output
-/coverage
-/types
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# App data
+appdata/
+userdata/
+
+# Misc
+*.swp
+*.swo
+
+# Coverage
