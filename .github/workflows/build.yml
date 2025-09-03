@@ -25,7 +25,7 @@ jobs:
       - name: Set up Wine (for Windows build on Linux)
         if: matrix.os == 'ubuntu-latest'
 
-        run: sudo dpkg --add-architecture i386 && apt-get update && sudo apt-get install -y wine32:i386 && sudo apt-get install -y wine
+        run: sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install -y wine32:i386 && sudo apt-get install -y wine
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
