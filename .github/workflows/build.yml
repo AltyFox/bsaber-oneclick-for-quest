@@ -16,11 +16,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [ubuntu-latest]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Wine (for Windows build on Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install -y wine
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
