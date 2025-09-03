@@ -30,7 +30,7 @@ jobs:
         run: npm ci
 
       - name: Build Electron app
-        run: npm run build
+        run: npm run package
 
       - name: List output
         run: ls -R dist/
