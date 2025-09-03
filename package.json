@@ -2,20 +2,26 @@
   "name": "electron-adb-checker",
   "version": "1.0.0",
   "description": "An Electron app to check for ADB presence, download it if missing, and connect to the user's Quest.",
-  "main": "src/main.ts",
+  "main": "src/main.js",
+  "type": "module",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
-    "package": "electron-builder --dir"
+    "package": "electron-builder --dir",
+    "format": "prettier --write \"src/**/*.js\""
   },
   "dependencies": {
-    "electron": "^25.0.0",
+    "adm-zip": "^0.5.16",
     "axios": "^0.27.2",
-    "fs-extra": "^10.0.0"
+    "fs-extra": "^10.0.0",
+    "prettier": "^3.6.2",
+    "tsc": "^2.0.4",
+    "yarn": "^1.22.22"
   },
   "devDependencies": {
-    "typescript": "^4.5.4",
-    "electron-builder": "^23.6.0"
+    "electron": "^38.0.0",
+    "electron-builder": "^23.6.0",
+    "typescript": "^4.9.5"
   },
   "repository": {
     "type": "git",
