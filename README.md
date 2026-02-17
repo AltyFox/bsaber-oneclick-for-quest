@@ -1,26 +1,43 @@
-# BSaber OneClick for Quest
-Userscript for Beat Saber OneClick support on [BeatSaver](https://beatsaver.com).
-This Script lets you install songs and playlists onto your Quest 1, 2, 3 and Pro with BeatSavers Oneclick feature.
+# Electron ADB Checker
 
-Works via WebUSB using [@yume-chan/adb](https://www.npmjs.com/package/@yume-chan/adb)
+## Overview
+Electron ADB Checker is an Electron application designed to verify the presence of Android Debug Bridge (ADB) on the user's system. If ADB is not found, the application will automatically download it for the user. The app also facilitates connecting to the user's Quest device and provides a seamless experience for accessing BeatSaver.
 
-## Installing
+## Features
+- Checks for the presence of ADB on the user's system.
+- Automatically downloads ADB if it is missing (Windows).
+- Prompts the user to install ADB on Linux systems.
+- Connects to the user's Quest device.
+- Loads the BeatSaver website for easy access.
 
-Note, SideQuest, and QuestPatcher spawn ADB instances.  Ensure these are closed.
+## Installation
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/electron-adb-checker.git
+   ```
+2. Navigate to the project directory:
+   ```
+   cd electron-adb-checker
+   ```
+3. Install the dependencies:
+   ```
+   npm install
+   ```
 
-Make sure there are no running ADB instances on your computer by running this command from your run dialog (Win+R)
+## Usage
+To run the application, use the following command:
+```
+npm start
+```
 
-`taskkill /f /im adb*`.
+## Development
+- The main entry point for the application is located in `src/main.ts`.
+- The renderer process is managed in `src/renderer.ts`.
+- Utility functions related to ADB can be found in `src/utils/adb.ts`.
+- TypeScript interfaces and types are defined in `src/types/index.ts`.
 
-No need to run this command if you haven't used ADB since you've logged into your computer.
+## Contributing
+Contributions are welcome! Please open an issue or submit a pull request for any enhancements or bug fixes.
 
-Connect your Quest to your computer.
-
-Requires Violentmonkey for best compatibility, or some other UserScript browser plugin. 
-
-Once Violentmonkey or an equivalent UserScript plugin is installed, [please click here to install the userscript](https://github.com/AltyFox/bsaber-oneclick-for-quest/releases/latest/download/index.user.js)
-
-Once the UserScript is installed, visit http://beatsaver.com and click "Quest OneClick" in the titlebar.
-
-This is a userscript initiated from [@violentmonkey/generator-userscript](https://github.com/violentmonkey/generator-userscript).
-
+## License
+This project is licensed under the MIT License. See the LICENSE file for more details.
